@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作业七 · Hugging Face vs 豆包 · 身体结构动态提示词生成对比</title>
+<style>
+  :root{
+    --bg1:#c9c6c3;--bg2:#b8b5b2;
+    --ink:#3a3735;--ink-soft:#7d7875;
+    --glass:linear-gradient(155deg,rgba(255,255,255,.66),rgba(255,255,255,.36));
+    --brd:rgba(255,255,255,.72);
+    --shadow:0 20px 46px -26px rgba(70,64,60,.6);
+    --radius:26px;
+    --hf:#ff8c2a;--hf-bg:#fff3e8;--hf-soft:#ffe4cc;--hf-line:#ff8c2a;
+    --db:#3b82f6;--db-bg:#eff6ff;--db-soft:#dbeafe;--db-line:#3b82f6;
+    --navy:#101d32;
+    --line:#e5e1dd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+    color:var(--ink);min-height:100vh;padding:56px 20px 64px;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(900px 520px at 8% -6%, rgba(255,255,255,.8), transparent 62%),
+      radial-gradient(760px 480px at 96% 108%, rgba(255,255,255,.62), transparent 58%),
+      linear-gradient(160deg,var(--bg1),var(--bg2));
+    background-attachment:fixed;line-height:1.7;
+  }
+  .page{width:min(1180px,100%);margin:0 auto}
+  .back{display:inline-flex;align-items:center;gap:6px;margin-bottom:26px;font-size:12px;font-weight:600;
+    color:#6b6460;text-decoration:none;padding:8px 16px;border-radius:99px;background:rgba(255,255,255,.5);
+    border:1px solid var(--brd)}
+  .back:hover{color:#3a3735}
+
+  /* ===== Hero ===== */
+  .hero{text-align:center;padding:10px 0 40px}
+  .eyebrow{font-size:12px;letter-spacing:.28em;color:var(--ink-soft);text-transform:uppercase}
+  .hero h1{font-size:clamp(26px,4.5vw,42px);font-weight:800;margin:12px 0 14px;letter-spacing:.02em;
+    background:linear-gradient(180deg,#4b4643,#8b847f);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .lead{font-size:14px;line-height:2;color:var(--ink-soft);max-width:680px;margin:0 auto}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:20px}
+  .chips span{font-size:11.5px;padding:7px 15px;border-radius:99px;color:#6b6460;background:rgba(255,255,255,.5);
+    border:1px solid var(--brd);backdrop-filter:blur(8px)}
+
+  /* ===== Section ===== */
+  .section{margin-top:22px;padding:28px;border-radius:var(--radius);background:var(--glass);
+    border:1px solid var(--brd);box-shadow:var(--shadow);
+    backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%)}
+  .shead{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+  .snum{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 38px;
+    border-radius:12px;background:var(--navy);color:#fff;font-size:12px;font-weight:800;letter-spacing:.08em}
+  .section h2{font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .ssub{margin-top:4px;color:var(--ink-soft);font-size:12.5px}
+
+  /* ===== Video 对比 ===== */
+  .video-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .video-card{border-radius:20px;overflow:hidden;border:1px solid var(--line);background:#fff}
+  .video-card .label{padding:12px 16px;font-size:13px;font-weight:700;letter-spacing:.05em}
+  .video-card.hf .label{background:var(--hf-bg);color:var(--hf);border-bottom:2px solid var(--hf-line)}
+  .video-card.db .label{background:var(--db-bg);color:var(--db);border-bottom:2px solid var(--db-line)}
+  video{width:100%;display:block;background:#000;aspect-ratio:16/9;object-fit:contain}
+  .video-card .note{padding:12px 16px;font-size:12px;color:var(--ink-soft);background:#faf9f8;border-top:1px solid var(--line);line-height:1.8}
+
+  /* ===== 模型卡 ===== */
+  .model-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}
+  .model-card{border-radius:18px;padding:22px;border:1px solid var(--line);background:#fff}
+  .model-card.hf{border-top:4px solid var(--hf-line)}
+  .model-card.db{border-top:4px solid var(--db-line)}
+  .model-card .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .model-card .logo{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-size:18px;font-weight:900;color:#fff}
+  .model-card.hf .logo{background:linear-gradient(135deg,#ff8c2a,#ffb066)}
+  .model-card.db .logo{background:linear-gradient(135deg,#3b82f6,#60a5fa)}
+  .model-card h3{font-size:16px;font-weight:800}
+  .model-card .ver{font-size:11px;color:var(--ink-soft);margin-top:2px}
+  .model-card .desc{font-size:12.5px;color:#5d5854;line-height:1.9;margin-bottom:14px}
+  .kv{display:grid;gap:8px}
+  .kv .row{display:flex;gap:10px;font-size:12.5px;line-height:1.7}
+  .kv .row b{flex:0 0 96px;color:#4a4642;font-weight:700}
+  .kv .row span{color:#5d5854}
+  .kv .row.ok b{color:#4b7a5f}
+  .kv .row.rate b{color:#a8596a}
+
+  /* ===== 表格 ===== */
+  .twrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:#fff}
+  table{width:100%;border-collapse:collapse;font-size:12.8px;min-width:640px}
+  thead th{padding:12px 14px;background:var(--navy);color:#dce6f4;font-size:11.5px;letter-spacing:.06em;
+    text-align:left;font-weight:700;white-space:nowrap}
+  tbody td{padding:13px 14px;border-bottom:1px solid var(--line);color:#4a4642;vertical-align:top;line-height:1.7}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:nth-child(even){background:#fbfaf9}
+  td.tag{font-size:13px}
+  .hf-t{color:var(--hf);font-weight:700}
+  .db-t{color:var(--db);font-weight:700}
+  .good{color:#4b7a5f;font-weight:700}
+  .bad{color:#a8596a;font-weight:700}
+  .neut{color:#8a8580;font-weight:700}
+  .axis thead th.hf-h{background:var(--hf)}
+  .axis thead th.db-h{background:var(--db)}
+  .axis tbody th{background:#faf9f8;font-weight:800;color:#57524e;text-align:left;border-bottom:1px solid var(--line);
+    padding:12px 14px;font-size:12px}
+  .axis tbody td{text-align:center}
+
+  /* ===== 提示词 ===== */
+  .prompt-box{position:relative;margin-top:14px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+  .prompt-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    padding:11px 16px;background:#f6f5f4;border-bottom:1px solid var(--line)}
+  .prompt-head b{font-size:12.5px;letter-spacing:.05em;color:#4b4643}
+  .prompt-head .tag{font-size:11px;padding:2px 9px;border-radius:99px;font-weight:700}
+  .prompt-head .tag.hf-tg{background:var(--hf-bg);color:var(--hf)}
+  .prompt-head .tag.db-tg{background:var(--db-bg);color:var(--db)}
+  .copy{border:1px solid var(--brd);border-radius:99px;background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.6));
+    color:#4b4643;font-size:11.5px;font-weight:700;padding:7px 15px;cursor:pointer}
+  .copy:active{transform:scale(.96)}
+  .prompt-box pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;
+    font-family:inherit;font-size:12.8px;line-height:1.9;color:#413d3a}
+
+  /* ===== 评分条 ===== */
+  .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+  .score-mini{border:1px solid var(--line);border-radius:14px;background:#fff;padding:15px 17px}
+  .score-mini h3{font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .score-mini h3 .dot{width:10px;height:10px;border-radius:50%}
+  .score-mini.hf h3 .dot{background:var(--hf)}
+  .score-mini.db h3 .dot{background:var(--db)}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:11.5px}
+  .bar-row .label{width:96px;color:#5d5854;flex:0 0 96px}
+  .bar-row .bar{flex:1;height:10px;background:#f0edea;border-radius:99px;overflow:hidden}
+  .bar-row .fill{height:100%;border-radius:99px;transition:width 1s}
+  .score-mini.hf .fill{background:linear-gradient(90deg,var(--hf),#ffb066)}
+  .score-mini.db .fill{background:linear-gradient(90deg,var(--db),#60a5fa)}
+  .bar-row .val{width:32px;text-align:right;font-weight:700;color:#4a4642;flex:0 0 32px}
+  .score-mini .total{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);
+    display:flex;justify-content:space-between;align-items:center}
+  .score-mini .total .score-num{font-size:28px;font-weight:800}
+  .score-mini.hf .total .score-num{color:var(--hf)}
+  .score-mini.db .total .score-num{color:var(--db)}
+  .score-mini .total .score-label{font-size:11px;color:var(--ink-soft);letter-spacing:.1em}
+
+  /* ===== 结论 ===== */
+  .close{margin-top:22px;padding:24px 26px;border-radius:20px;color:#eaf2fb;
+    background:radial-gradient(circle at 90% 20%,rgba(255,140,42,.15),transparent 30%),radial-gradient(circle at 10% 80%,rgba(59,130,246,.15),transparent 30%),linear-gradient(120deg,#101d32,#0d2930)}
+  .close p{font-size:15px;font-weight:600;line-height:2}
+  .close .hf-c{color:#ffb066;font-weight:800}
+  .close .db-c{color:#93c5fd;font-weight:800}
+
+  .foot{text-align:center;margin-top:26px;font-size:11.5px;color:var(--ink-soft);letter-spacing:.08em;line-height:2}
+  .toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:#3a3735;color:#fff;font-size:12.5px;padding:10px 20px;border-radius:99px;pointer-events:none;
+    transition:.35s;z-index:9}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  @media(max-width:820px){
+    body{padding:36px 14px 52px}
+    .section{padding:20px 16px}
+    .video-row,.model-row,.score-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <a class="back" href="index.html">← 返回我的学习成果</a>
+
+  <header class="hero">
+    <p class="eyebrow">2026 · AI 课程作品集 · 作业七</p>
+    <h1>Hugging Face vs 豆包<br>身体结构动态提示词生成对比</h1>
+    <p class="lead">同一主题（解剖学 / 康复医学）、同类型任务（身体结构动态视频生成）<br>
+      用 Hugging Face Space 一键生成 vs 用豆包 Seedance 多模态生成<br>
+      横向对比模型、可控参数、技能栈、提示词与出图质量</p>
+    <div class="chips">
+      <span>🎬 视频生成对比</span>
+      <span>🧠 Hugging Face Spaces</span>
+      <span>🫘 豆包 Seedance</span>
+      <span>🔬 解剖学 / 康复医学</span>
+      <span>📝 动态提示词</span>
+    </div>
+  </header>
+
+  <!-- 01 视频并排 -->
+  <section class="section">
+    <div class="shead">
+      <span class="snum">01</span>
+      <div>
+        <h2>两段生成视频并排对照</h2>
+        <p class="ssub">同一主题、相似提示词、不同平台。请分别观察视频播放效果、运动流畅度、身体结构准确性与风格一致性。</p>
+      </div>
+    </div>
+    <div class="video-row">
+      <div class="video-card hf">
+        <div class="label">🟠 Hugging Face Space · 视频生成</div>
+        <video controls preload="metadata" poster="">
+          <source src="生成身体结构照片动态提示词.mp4" type="video/mp4">
+          您的浏览器不支持视频播放
+        </video>
+        <div class="note">文件名：生成身体结构照片动态提示词.mp4 · 约 6.6 MB · 时长较长 · 原始工作流水</div>
+      </div>
+      <div class="video-card db">
+        <div class="label">🔵 豆包 Seedance · 图生视频</div>
+        <video controls preload="metadata">
+          <source src="tmptqtjbijn.mp4" type="video/mp4">
+          您的浏览器不支持视频播放
+        </video>
+        <div class="note">文件名：tmptqtjbijn.mp4 · 约 857 KB · 时长较短 · 豆包平台输出</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 模型与参数 -->
+  <section class="section">
+    <div class="shead">
+      <span class="snum">02</span>
+      <div>
+        <h2>模型 · 可控参数 · 技能栈</h2>
+        <p class="ssub">两个平台背后的模型版本、可调节参数、提示词公式和可组合的控制能力。</p>
+      </div>
+    </div>
+
+    <div class="model-row">
+      <div class="model-card hf">
+        <div class="logo-row">
+          <div class="logo">HF</div>
+          <div>
+            <h3>Hugging Face Spaces</h3>
+            <div class="ver">开源社区 · 2026 年可用生态</div>
+          </div>
+        </div>
+        <p class="desc">Hugging Face 本身不是一个视频生成模型，而是一个模型分发 + 交互式演示平台。用户在 Spaces 页面上运行社区维护的视频生成工作流（底层可能是 Wan 系列、MimicMotion、MiniMax H3、SVD 等），通常通过 WebUI（Gradio/Streamlit）或 ComfyUI 工作流组合 ControlNet 来实现身体结构可控生成。</p>
+        <div class="kv">
+          <div class="row ok"><b>核心模型</b><span>社区选择：Wan2.x / MimicMotion / MiniMax H3 / SVD</span></div>
+          <div class="row"><b>ControlNet</b><span>Canny / Depth / HED / MLSD / Pose / Union</span></div>
+          <div class="row"><b>分辨率</b><span>480p → 720p → 部分模型到 1080p</span></div>
+          <div class="row"><b>时长</b><span>4–16 秒（模型不等）</span></div>
+          <div class="row"><b>帧率</b><span>24 fps 为主</span></div>
+          <div class="row"><b>提示词语言</b><span>英文为主（训练数据 bias），中文部分模型可接受</span></div>
+          <div class="row"><b>需要 GPU</b><span>本地运行需要 ≥ 16GB 显存（24GB 更稳妥），Spaces 免费层排队严重</span></div>
+          <div class="row ok"><b>开源协议</b><span>Apache 2.0 / 社区许可，可商用（看具体模型）</span></div>
+        </div>
+      </div>
+
+      <div class="model-card db">
+        <div class="logo-row">
+          <div class="logo">豆</div>
+          <div>
+            <h3>豆包 Seedance 2.x</h3>
+            <div class="ver">字节跳动 · 商业闭源 API · 2026</div>
+          </div>
+        </div>
+        <p class="desc">Seedance 是字节跳动的统一多模态音视频联合生成架构，2025 年首发，2026 年迭代至 2.0 / 2.5。原生支持文本、图片、视频、音频四种模态混合输入，具备时间戳级视频编辑、多轮延长、首尾帧锁定等工业级可控性。集成在豆包 App、即梦 AI、火山方舟 API 中。</p>
+        <div class="kv">
+          <div class="row ok"><b>核心模型</b><span>Seedance 2.0 / 2.5（2026 年主力）</span></div>
+          <div class="row"><b>可控方式</b><span>全模态参考 + 时间戳编辑 + 首尾帧锁定 + 白模渲染</span></div>
+          <div class="row"><b>分辨率</b><span>480p / 720p / 1080p（API 层面）</span></div>
+          <div class="row"><b>时长</b><span>2.5 版单段 30 秒 + 多轮延长</span></div>
+          <div class="row"><b>帧率</b><span>24 fps</span></div>
+          <div class="row ok"><b>提示词语言</b><span>中文原生支持 + 10+ 种语言输出</span></div>
+          <div class="row ok"><b>硬件需求</b><span>云端 API，用户端零硬件门槛</span></div>
+          <div class="row rate"><b>开源协议</b><span>闭源商用，API 按量计费</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:15px;letter-spacing:.14em;margin:22px 0 12px;color:#57524e">📐 可控参数矩阵</h3>
+    <div class="twrap">
+      <table class="axis">
+        <thead>
+          <tr>
+            <th>可控维度</th>
+            <th class="hf-h">🟠 Hugging Face</th>
+            <th class="db-h">🔵 豆包 Seedance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>生成类型</th><td>T2V / I2V / R2V / V2V / Video Inpainting</td><td>T2V / I2V / R2V / 编辑 / 延长 / 一键成片</td></tr>
+          <tr><th>多模态输入</th><td>文本 + 首帧（部分模型加参考图/姿态）</td><td>文本 + 图片(30张) + 视频(10段) + 音频(10段) 混合</td></tr>
+          <tr><th>身体结构控制</th><td>ControlNet Pose / HED / Canny，需要单独提姿态骨架</td><td>文本直接描述「身体结构 / 关节运动 / 解剖层次」，原生理解</td></tr>
+          <tr><th>镜头运镜</th><td>靠提示词 + 少量 LoRA，不稳定</td><td>原生支持环绕 / 航拍 / 变焦 / 平移 / 跟随 / 手持</td></tr>
+          <tr><th>编辑精度</th><td>需 Video Inpainting，Mask 手工</td><td>时间戳级精准编辑，文本指定区域/属性/时机</td></tr>
+          <tr><th>首尾帧锁定</th><td>部分模型支持，API 不统一</td><td>原生支持 content.role=first_frame/last_frame 锁定</td></tr>
+          <tr><th>视频延长</th><td>通常需要分段 + ComfyUI 手工拼接</td><td>向前/向后延长，多轮续作，保持叙事一致</td></tr>
+          <tr><th>音频联合</th><td>多数模型只出无声视频</td><td>原生音频生成，双声道，多语言台词</td></tr>
+          <tr><th>负面提示词</th><td>Stable Diffusion 风格 `negative_prompt` 字段</td><td>2.5 版支持隐含约束，无显式 negative 字段</td></tr>
+          <tr><th>CFG Scale</th><td>可调 guidance_scale（通常 5–8）</td><td>内部固定（已蒸馏），用户不可调</td></tr>
+          <tr><th>采样步数</th><td>可调 num_inference_steps（通常 20–50）</td><td>内部固定，用户不可调</td></tr>
+          <tr><th>随机种子</th><td>可设 seed 复现</td><td>API 支持 seed 字段</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 03 提示词 -->
+  <section class="section">
+    <div class="shead">
+      <span class="snum">03</span>
+      <div>
+        <h2>提示词对比 · 同主题不同写法</h2>
+        <p class="ssub">相同目标（生成人体解剖 / 康复医学主题的身体结构动态视频），两边平台的提示词公式完全不同。</p>
+      </div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-head">
+        <b>🟠 Hugging Face · ControlNet 动态提示词（英文为主）</b>
+        <span class="tag hf-tg">英文 + ControlNet Pose</span>
+        <button class="copy" data-t="p-hf">复制提示词</button>
+      </div>
+      <pre id="p-hf">A full-body medical anatomy educational video clip, 6 seconds, 24fps, 720p.
+
+A semi-transparent human body standing upright, skin peeled away on the right side to reveal layered anatomy: facial musculature, neck muscles, pectoral girdle, ribcage with pulmonary vessels, abdominal muscle layers, quadriceps and calf muscles. The left side retains natural skin tone for comparison. The body slowly performs a knee flexion — the right knee bends forward smoothly while the semi-transparent layers stretch and compress accordingly; the joint capsule expands, cartilage compresses, and patella tracks along the femoral groove. Camera: frontal 3/4 view, static tripod, soft medical studio lighting from upper left, dark navy background. Scientific visualization style, volumetric glow on nerve fibers and vessels, subtle subsurface scattering on muscle tissue.
+
+ControlNet Pose: the body follows the provided skeleton sequence (JSON pose keypoints attached).
+
+Negative prompt: deformed anatomy, extra limbs, floating organs, cartoon style, low resolution, watermark, blurry anatomy labels
+
+Sampling: guidance_scale=7.5, num_inference_steps=30, seed=42</pre>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-head">
+        <b>🔵 豆包 Seedance · 多模态图生视频提示词（中文原生）</b>
+        <span class="tag db-tg">中文 + 首帧图 + Seedance 2.5 公式</span>
+        <button class="copy" data-t="p-db">复制提示词</button>
+      </div>
+      <pre id="p-db">参考图1中左侧的半透明人体解剖模型（左侧完整皮肤、右侧剥离露出肌肉骨骼），生成一段 8 秒医学教育视频。
+
+【精准主体】 将参考图1中穿白色解剖服的半透明人体定义为主体1。
+【动作细节】 主体1缓慢做膝关节屈曲动作：右腿平稳向前屈膝约 45°，半透明层随之拉伸与压缩，关节囊扩张、软骨受压、髌骨沿股骨滑槽运动，所有解剖层次运动自然连贯，无穿模。
+【场景环境】 医学教室背景，柔和白色无影灯从左上方照射，深蓝色渐变背景突出解剖层次。
+【光影色调】 冷调冷色，肌肉赭红、神经与血管青蓝发光、软骨淡青半透明，皮肤半透明白瓷感。
+【镜头运镜】 固定三脚架正面 3/4 角度，全程不移动，画面稳定、无抖动、无意外运镜。
+【视觉风格】 科学可视化，神经纤维与血管有发光辉，肌肉组织有次表面散射质感。
+【约束条件】 解剖结构必须准确，无多余肢体、无飘移器官，标签清晰可读，输出 720p 24fps。</pre>
+    </div>
+
+    <div class="twrap" style="margin-top:16px">
+      <table>
+        <thead>
+          <tr><th>提示词能力维度</th><th style="text-align:center">🟠 Hugging Face</th><th style="text-align:center">🔵 豆包 Seedance</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>语言理解</td><td class="hf-t" style="text-align:center">英文优 · 中文弱</td><td class="db-t" style="text-align:center">🟢 中文原生 + 10+ 语言</td></tr>
+          <tr><td>身体结构描述</td><td style="text-align:center">🟡 需英文专业术语，偶尔镜像错位</td><td style="text-align:center">🟢 直接中文描述解剖层次，理解准确</td></tr>
+          <tr><td>运动指令</td><td style="text-align:center">🟡 靠 Pose ControlNet 骨架约束</td><td style="text-align:center">🟢 文本直接描述动作细节，原生执行</td></tr>
+          <tr><td>镜头运镜</td><td style="text-align:center">🔴 描述了也不一定准</td><td style="text-align:center">🟢 原生跟随环绕/变焦/平移等指令</td></tr>
+          <tr><td>首帧参考锁定</td><td style="text-align:center">🟡 部分模型支持，API 不统一</td><td style="text-align:center">🟢 原生 content.role=first_frame 锁定</td></tr>
+          <tr><td>多图参考融合</td><td style="text-align:center">🔴 需自己拼 ControlNet 多分支</td><td style="text-align:center">🟢 单次最多 30 张图 + 10 段视频混合</td></tr>
+          <tr><td>负面提示词</td><td style="text-align:center">🟢 标准 negative_prompt 字段</td><td style="text-align:center">🟡 2.5 版隐含约束，无显式字段</td></tr>
+          <tr><td>可控参数暴露</td><td style="text-align:center">🟢 CFG / 步数 / seed 全开放</td><td style="text-align:center">🔴 CFG / 步数内部固定（蒸馏后）</td></tr>
+          <tr><td>提示词长度上限</td><td style="text-align:center">🟡 150–300 token（依模型）</td><td style="text-align:center">🟢 长文本工程级指令，支持嵌套引用</td></tr>
+          <tr><td>提示词调优成本</td><td style="text-align:center">🔴 门槛高：英文 + ControlNet + LoRA 组合</td><td style="text-align:center">🟢 门槛低：中文工程公式直接写</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 04 评分 -->
+  <section class="section">
+    <div class="shead">
+      <span class="snum">04</span>
+      <div>
+        <h2>专业评分 · 六维对比</h2>
+        <p class="ssub">基于本作业两个实际视频出图效果的主观评分（1–10 分），六个维度加权综合。</p>
+      </div>
+    </div>
+
+    <div class="score-grid">
+      <div class="score-mini hf">
+        <h3><span class="dot"></span>Hugging Face</h3>
+        <div class="bar-row"><span class="label">身体结构准确</span><div class="bar"><div class="fill" style="width:68%"></div></div><span class="val">6.8</span></div>
+        <div class="bar-row"><span class="label">运动流畅度</span><div class="bar"><div class="fill" style="width:62%"></div></div><span class="val">6.2</span></div>
+        <div class="bar-row"><span class="label">解剖专业感</span><div class="bar"><div class="fill" style="width:70%"></div></div><span class="val">7.0</span></div>
+        <div class="bar-row"><span class="label">风格一致性</span><div class="bar"><div class="fill" style="width:65%"></div></div><span class="val">6.5</span></div>
+        <div class="bar-row"><span class="label">文字渲染</span><div class="bar"><div class="fill" style="width:45%"></div></div><span class="val">4.5</span></div>
+        <div class="bar-row"><span class="label">可控性</span><div class="bar"><div class="fill" style="width:75%"></div></div><span class="val">7.5</span></div>
+        <div class="total">
+          <div><div class="score-label">综合评分</div></div>
+          <div class="score-num">6.42</div>
+        </div>
+      </div>
+
+      <div class="score-mini db">
+        <h3><span class="dot"></span>豆包 Seedance</h3>
+        <div class="bar-row"><span class="label">身体结构准确</span><div class="bar"><div class="fill" style="width:80%"></div></div><span class="val">8.0</span></div>
+        <div class="bar-row"><span class="label">运动流畅度</span><div class="bar"><div class="fill" style="width:85%"></div></div><span class="val">8.5</span></div>
+        <div class="bar-row"><span class="label">解剖专业感</span><div class="bar"><div class="fill" style="width:78%"></div></div><span class="val">7.8</span></div>
+        <div class="bar-row"><span class="label">风格一致性</span><div class="bar"><div class="fill" style="width:82%"></div></div><span class="val">8.2</span></div>
+        <div class="bar-row"><span class="label">文字渲染</span><div class="bar"><div class="fill" style="width:55%"></div></div><span class="val">5.5</span></div>
+        <div class="bar-row"><span class="label">可控性</span><div class="bar"><div class="fill" style="width:70%"></div></div><span class="val">7.0</span></div>
+        <div class="total">
+          <div><div class="score-label">综合评分</div></div>
+          <div class="score-num">7.50</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:15px;letter-spacing:.14em;margin:22px 0 12px;color:#57524e">🔍 维度解读</h3>
+    <div class="twrap">
+      <table>
+        <thead>
+          <tr><th>维度</th><th>🟠 Hugging Face 表现</th><th>🔵 豆包 Seedance 表现</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>身体结构准确</b></td><td>ControlNet Pose 能锁定关键骨骼点，但软组织层的拉伸/压缩偶尔穿模</td><td>中文描述「半透明层随之拉伸与压缩」能被正确执行，关节运动更自然</td></tr>
+          <tr><td><b>运动流畅度</b></td><td>部分模型（如 SVD）短片段流畅，但长片段累积漂移</td><td>Seedance 2.5 统一架构，30 秒内运动连贯，无帧间跳跃</td></tr>
+          <tr><td><b>解剖专业感</b></td><td>英文专业术语 + 训练数据偏向，肌肉/血管细节有时不够医学级</td><td>中文医学场景训练多，能理解「软骨受压」「髌骨滑槽」等细分动作</td></tr>
+          <tr><td><b>风格一致性</b></td><td>单模型内风格稳定，但换模型/换 LoRA 后跳跃</td><td>参考图锁定风格，多模态融合后整体一致</td></tr>
+          <tr><td><b>文字渲染</b></td><td>🔴 两边都是弱项——视频里叠字都需要后期合成，模型原生不负责</td><td>🔴 同上，Seedance 无显式文本嵌入，标签需后期叠加</td></tr>
+          <tr><td><b>可控性</b></td><td>🟢 参数完全开放（CFG / 步数 / ControlNet 强度），需要专业知识调参</td><td>🔵 参数蒸馏后内部固定，用户只写指令——简单但灵活性受限</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 05 结论 -->
+  <div class="close">
+    <p>
+      <span class="hf-c">Hugging Face</span> 给你一把瑞士军刀——ControlNet / LoRA / CFG / 步数全开放，想精调哪里调哪里，代价是你得会组装。
+      它适合学术研究、个性化工作流、需要完全可解释性的场景。<br><br>
+      <span class="db-c">豆包 Seedance</span> 给你一个 AI 导演——中文原生、全模态混合、时间戳编辑、30 秒叙事——代价是内部固定参数，用户只发指令不碰旋钮。
+      它适合快速出片、中文内容、专业级医学/教育视频生产。<br><br>
+      结论：<b>解剖学 / 康复医学主题的动态视频生成，豆包在中文理解和运动准确性上明显领先；但 Hugging Face 的开源可控参数栈，在需要极致精调身体结构时仍是刚需。</b>
+    </p>
+  </div>
+
+  <div class="foot">作业七 · Hugging Face vs 豆包 · 身体结构动态提示词生成对比 · 2026 AI 课程作品集<br>视频文件与页面位于同一文件夹，可离线运行</div>
+
+</main>
+
+<div class="toast" id="toast">已复制到剪贴板 ✓</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const text = document.getElementById(btn.dataset.t).innerText;
+    const done = () => {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+    } else { fallback(text, done); }
+  });
+});
+function fallback(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) {}
+  document.body.removeChild(ta);
+}
+// 填充进度条动画
+setTimeout(() => {
+  document.querySelectorAll('.fill').forEach(el => {
+    const w = el.style.width; el.style.width = '0';
+    requestAnimationFrame(() => { el.style.width = w; });
+  });
+}, 400);
+</script>
+</body>
+</html>

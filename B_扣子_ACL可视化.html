@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACL 损伤风险与着陆生物力学 · 论文图表可视化分析</title>
+<style>
+  :root{
+    --blue-900:#1e3a8a;
+    --blue-700:#1d4ed8;
+    --blue-500:#3b82f6;
+    --blue-100:#dbeafe;
+    --blue-50:#eff6ff;
+    --brown-700:#92400e;
+    --brown-600:#b45309;
+    --brown-500:#d97706;
+    --brown-100:#fef3c7;
+    --brown-50:#fffbeb;
+    --ink:#0f172a;
+    --ink-2:#475569;
+    --ink-3:#94a3b8;
+    --line:#e2e8f0;
+    --line-2:#f1f5f9;
+    --bg:#f5f7fa;
+    --card:#ffffff;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 10px 26px -14px rgba(15,23,42,.18);
+    --left-w:246px;
+    --right-w:352px;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.65;
+    overflow-x:hidden;
+  }
+  a{color:var(--blue-700);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--blue-500);outline-offset:2px;border-radius:4px}
+
+  .page-head{
+    padding:26px 22px 20px;
+    background:linear-gradient(180deg,#ffffff 0%,#f7f9fc 100%);
+    border-bottom:1px solid var(--line);
+  }
+  .page-head .inner{max-width:1680px;margin:0 auto}
+  .kicker{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brown-700);font-weight:700;
+    background:var(--brown-100);border-radius:999px;padding:3px 11px;margin-bottom:10px;
+  }
+  .page-head h1{
+    margin:0 0 10px;font-size:25px;line-height:1.32;letter-spacing:-.015em;font-weight:750;
+    max-width:900px;
+  }
+  .page-head h1 .em{color:var(--blue-700)}
+  .src-line{
+    margin:0;font-size:13.5px;color:var(--ink-2);
+    display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;
+  }
+  .src-line b{color:var(--ink);font-weight:650}
+
+  .layout{
+    display:grid;
+    grid-template-columns:var(--left-w) 7px minmax(0,1fr) 7px var(--right-w);
+    align-items:start;
+    padding:18px 20px 48px;
+    max-width:1680px;
+    margin:0 auto;
+  }
+  .col{min-width:0}
+  .col-left{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;padding-right:2px}
+  .col-left::-webkit-scrollbar,.col-right::-webkit-scrollbar{width:8px}
+  .col-left::-webkit-scrollbar-thumb,.col-right::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+
+  .resizer{
+    position:relative;width:7px;align-self:stretch;min-height:240px;
+    cursor:col-resize;touch-action:none;background:transparent;border:0;padding:0;
+  }
+  .resizer::after{
+    content:"";position:absolute;inset:0 3px;background:var(--line);border-radius:2px;transition:background .15s;
+  }
+  .resizer:hover::after,.resizer:focus-visible::after,.resizer.dragging::after{background:var(--blue-500)}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px;
+  }
+  .card:last-child{margin-bottom:0}
+  .card h2{
+    margin:0 0 4px;font-size:16px;font-weight:700;letter-spacing:-.01em;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .card h2 .tag{
+    font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--blue-700);
+    background:var(--blue-50);border:1px solid var(--blue-100);border-radius:999px;padding:1px 8px;
+  }
+  .card h3{margin:16px 0 8px;font-size:14px;font-weight:700;color:var(--ink)}
+  .card .sub{margin:0 0 12px;font-size:13px;color:var(--ink-2)}
+  .note{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+
+  /* 左栏 */
+  .toc{list-style:none;margin:0;padding:0}
+  .toc li{margin:0}
+  .toc a{
+    display:flex;align-items:baseline;gap:8px;padding:6px 9px;border-radius:8px;
+    color:var(--ink-2);font-size:13.5px;transition:background .15s,color .15s;
+  }
+  .toc a:hover{background:var(--blue-50);color:var(--blue-700);text-decoration:none}
+  .toc a .n{font-variant-numeric:tabular-nums;font-size:11.5px;color:var(--ink-3);font-weight:700;min-width:16px}
+
+  .concl-list{margin:0;padding-left:0;list-style:none;counter-reset:c}
+  .concl-list li{
+    position:relative;padding-left:26px;margin-bottom:11px;font-size:13.5px;line-height:1.62;color:var(--ink-2);
+  }
+  .concl-list li::before{
+    counter-increment:c;content:counter(c);
+    position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:50%;
+    background:var(--blue-100);color:var(--blue-900);font-size:11px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .concl-list li strong{color:var(--ink);font-weight:650}
+
+  .stat-grid{display:grid;gap:9px}
+  .stat{
+    border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--line-2);
+  }
+  .stat .lab{font-size:11.5px;color:var(--ink-3);font-weight:600;letter-spacing:.02em}
+  .stat .val{font-size:17px;font-weight:750;color:var(--blue-900);font-variant-numeric:tabular-nums;line-height:1.3}
+  .stat .val small{font-size:11.5px;font-weight:600;color:var(--ink-2)}
+  .stat.warn .val{color:var(--brown-700)}
+
+  /* 流程 */
+  .flow{
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:6px 0 2px;
+  }
+  .flow-step{
+    position:relative;background:var(--line-2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 12px 12px;
+  }
+  .flow-step::before{
+    content:"";position:absolute;top:26px;right:-10px;width:10px;height:2px;background:var(--line);
+  }
+  .flow-step:last-child::before{display:none}
+  .flow-step .idx{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:21px;height:21px;border-radius:6px;background:var(--blue-700);color:#fff;
+    font-size:11.5px;font-weight:800;margin-bottom:7px;
+  }
+  .flow-step:nth-child(3) .idx{background:var(--brown-600)}
+  .flow-step h4{margin:0 0 5px;font-size:13px;font-weight:700;line-height:1.4}
+  .flow-step p{margin:0;font-size:12px;color:var(--ink-2);line-height:1.55}
+  .flow-step .meta{margin-top:6px;font-size:11px;color:var(--ink-3);font-weight:600}
+
+  /* 图表 */
+  .chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .btn{
+    font:inherit;font-size:12px;font-weight:650;color:var(--blue-700);
+    background:#fff;border:1px solid var(--blue-100);border-radius:8px;padding:5px 11px;
+    cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,transform .1s;
+  }
+  .btn:hover{background:var(--blue-50);border-color:var(--blue-500)}
+  .btn:active{transform:translateY(1px)}
+  .svg-wrap{position:relative;width:100%}
+  .svg-wrap svg{display:block;width:100%;height:auto;overflow:visible}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .lg{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);
+    cursor:pointer;user-select:none;border-radius:6px;padding:2px 5px;border:1px solid transparent;
+    transition:opacity .15s,background .15s,border-color .15s;
+  }
+  .lg:hover{background:var(--line-2);border-color:var(--line)}
+  .lg.off{opacity:.34;text-decoration:line-through}
+  .lg .sw{width:11px;height:11px;flex:none}
+
+  .tip{
+    position:fixed;z-index:60;pointer-events:none;opacity:0;transform:translate(-50%,-118%);
+    background:rgba(15,23,42,.94);color:#fff;font-size:12px;line-height:1.5;
+    padding:7px 10px;border-radius:8px;white-space:nowrap;
+    transition:opacity .12s;box-shadow:0 8px 22px -8px rgba(15,23,42,.5);
+  }
+  .tip.on{opacity:1}
+  .tip b{font-weight:700}
+  .tip .t-row{display:flex;gap:8px;justify-content:space-between}
+  .tip .t-row span:last-child{font-variant-numeric:tabular-nums}
+
+  /* 表格 */
+  .tbl-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff}
+  caption{caption-side:top;text-align:left;font-size:12px;color:var(--ink-3);padding:0 0 7px;font-weight:600}
+  th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  thead th{background:var(--line-2);font-weight:700;color:var(--ink);font-size:12px;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .sig{color:var(--brown-700);font-weight:700}
+  .ns{color:var(--ink-3)}
+  .badge{
+    display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;
+    background:var(--brown-100);color:var(--brown-700);
+  }
+  .badge.blue{background:var(--blue-100);color:var(--blue-900)}
+
+  .callout{
+    border-left:3px solid var(--brown-500);background:var(--brown-50);
+    border-radius:0 9px 9px 0;padding:10px 13px;font-size:12.5px;color:#78350f;line-height:1.62;
+  }
+  .callout.blue{border-left-color:var(--blue-500);background:var(--blue-50);color:#1e3a8a}
+  .callout strong{font-weight:750}
+
+  ul.plain{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--ink-2);line-height:1.7}
+  ul.plain li{margin-bottom:4px}
+
+  footer{
+    padding:20px 22px 34px;text-align:center;font-size:12px;color:var(--ink-3);
+    border-top:1px solid var(--line);
+  }
+
+  @media (max-width:1180px){
+    .layout{grid-template-columns:1fr;padding:14px 14px 36px}
+    .col-left{position:static;max-height:none;overflow:visible}
+    .resizer{display:none}
+    .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .flow-step::before{display:none}
+    .page-head h1{font-size:21px}
+  }
+  @media (max-width:620px){
+    .flow{grid-template-columns:1fr}
+    .card{padding:14px}
+    .page-head{padding:20px 14px 16px}
+    .page-head h1{font-size:19px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important}
+  }
+  @media print{
+    body{background:#fff;font-size:11pt}
+    .resizer,.btn,.tip,.col-left{display:none}
+    .layout{display:block;padding:0;max-width:none}
+    .card{break-inside:avoid;box-shadow:none;border-color:#cbd5e1;margin-bottom:12px}
+    .page-head{background:#fff;border-bottom:1px solid #cbd5e1}
+    a{color:#0f172a;text-decoration:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div class="inner">
+    <span class="kicker">运动生物力学 · 论文图表复现</span>
+    <h1>疲劳与性别如何改变着陆瞬间的<span class="em">膝屈角</span>——ACL 损伤风险变量的峰值出现在什么位置</h1>
+    <p class="src-line">
+      <span><b>数据来源：</b>论文正文页（对象与方法、结果）＋图表页 图 2–7，共 6 张图片</span>
+      <span><b>核心方法：</b>性别 × 疲劳 重复测量 MANOVA</span>
+      <span><b>设计：</b>疲劳前 / 疲劳后 自身对照</span>
+    </p>
+  </div>
+</header>
+
+<main class="layout" id="layout">
+
+  <nav class="col col-left" aria-label="页面导航与结论摘要">
+    <section class="card">
+      <h2>目录</h2>
+      <ul class="toc">
+        <li><a href="#sec-flow"><span class="n">01</span>研究流程</a></li>
+        <li><a href="#sec-landing"><span class="n">02</span>着陆周期峰值位置（图 2–5）</a></li>
+        <li><a href="#sec-bar"><span class="n">03</span>组间对比（图 6–7）</a></li>
+        <li><a href="#sec-inter"><span class="n">04</span>性别 × 疲劳交互效应</a></li>
+        <li><a href="#sec-table"><span class="n">05</span>统计附表</a></li>
+        <li><a href="#sec-check"><span class="n">06</span>读图清单</a></li>
+        <li><a href="#sec-concl"><span class="n">07</span>结论</a></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>结论摘要</h2>
+      <p class="sub">仅陈述论文自身结论</p>
+      <ol class="concl-list">
+        <li>所有被研究的生物力学变量峰值——包括此前被认为与 ACL 损伤相关的<strong>膝外翻、VGRF 与股四头肌活动</strong>——都出现在膝屈角 <strong>&gt; 40°</strong> 的着陆阶段后期。</li>
+        <li>性别与疲劳对“峰值出现时的膝屈角”<strong>均无显著主效应</strong>（p = 0.053、p = 0.119），但<strong>性别 × 疲劳交互作用显著</strong>（p &lt; 0.05）。</li>
+        <li>疲劳后<strong>女性 VGRF 峰值时的膝屈角下降 5.6°</strong>（52.7° → 47.1°），男性则上升约 1°（48.8° → 49.6°）。</li>
+        <li>作者认为，只看整个着陆周期的峰值可能<strong>无法充分反映膝屈角对 ACL 拉力的影响</strong>，未来研究应在着陆初期（&lt; 40°）测量。</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>关键数字</h2>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="lab">女性 VGRF 峰值时膝屈角变化</div>
+          <div class="val">−5.6<small>°（52.7 → 47.1）</small></div>
+        </div>
+        <div class="stat">
+          <div class="lab">男性 VGRF 峰值时膝屈角变化</div>
+          <div class="val">+0.8<small>°（48.8 → 49.6）</small></div>
+        </div>
+        <div class="stat warn">
+          <div class="lab">外侧腿后肌 NEMG 峰值时膝屈角 · 男性</div>
+          <div class="val">+11.5<small>°（62.2 → 73.7，p = 0.003）</small></div>
+        </div>
+        <div class="stat">
+          <div class="lab">全部变量峰值出现的膝屈角</div>
+          <div class="val">&gt; 40<small>°</small></div>
+        </div>
+      </div>
+    </section>
+  </nav>
+
+  <div class="resizer" id="rzLeft" role="separator" aria-orientation="vertical" aria-label="调整左栏宽度" tabindex="0"></div>
+
+  <section class="col col-center">
+
+    <article class="card" id="sec-flow">
+      <h2><span class="tag">方法</span>研究流程：一次会话内完成的疲劳前 / 疲劳后对照</h2>
+      <p class="sub">按正文“对象与方法”还原实验时序。所有受试者在完成疲劳方案后 6 分钟内结束全部疲劳后测试。</p>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="idx">1</div>
+          <h4>准备与练习</h4>
+          <p>粘贴 EMG 电极；允许 2 次练习跳跃。不给予任何着陆技术指导，以避免教练效应。</p>
+          <div class="meta">2 次练习</div>
+        </div>
+        <div class="flow-step">
+          <div class="idx">2</div>
+          <h4>疲劳前测试</h4>
+          <p>从 40 cm 平台双侧落地，双臂交叉贴胸以消除手臂影响；3 次成功着陆纳入分析。</p>
+          <div class="meta">3 次 × 40 cm</div>
+        </div>
+        <div class="flow-step">
+          <div class="idx">3</div>
+          <h4>疲劳方案</h4>
+          <p>连续跳过 5 个 5–7 cm 障碍，重复 20 组共 100 次跳；随后垂直跳最多 50 次。</p>
+          <div class="meta">100 + ≤50 次</div>
+        </div>
+        <div class="flow-step">
+          <div class="idx">4</div>
+          <h4>疲劳后测试</h4>
+          <p>断开（不取下）导线，方案结束后重新连接，重复同一落地评估程序。</p>
+          <div class="meta">3 次 × 40 cm</div>
+        </div>
+        <div class="flow-step">
+          <div class="idx">5</div>
+          <h4>处理与统计</h4>
+          <p>Orthotrak 5.0；运动学 4 阶 Butterworth 6 Hz，EMG 6 阶 10–500 Hz；20 cm 平台落地 EMG 归一化；VGRF 归一化为体重。</p>
+          <div class="meta">MANOVA + ANOVA</div>
+        </div>
+      </div>
+      <p class="note" style="margin-top:12px">
+        受试者为每周至少参加 2 次含跳跃运动的休闲运动员；每周运动时长男女无差异（男 6.6 ± 3 h，女 7.1 ± 6 h，p = 0.77）。受试者人数、年龄与身高体重<strong>论文未给出</strong>。
+      </p>
+    </article>
+
+    <article class="card" id="sec-landing">
+      <div class="chart-head">
+        <div>
+          <h2><span class="tag">图 2–5</span>着陆周期中各生物力学变量的峰值出现在哪里</h2>
+          <p class="sub">四联子图共享坐标轴，鼠标在任一子图内移动可同步查看同一着陆进度下的膝屈角。</p>
+        </div>
+        <button class="btn" type="button" data-export="chartLanding" data-name="图2-5_着陆周期峰值位置">导出 PNG</button>
+      </div>
+      <div class="svg-wrap">
+        <svg id="chartLanding" viewBox="0 0 960 700" role="img" aria-labelledby="landingTitle landingDesc" preserveAspectRatio="xMidYMid meet">
+          <title id="landingTitle">图 2 至图 5 复现：着陆周期百分比与膝屈角关系，以及六个生物力学变量峰值出现的位置</title>
+          <desc id="landingDesc">四联折线图，横轴为着陆周期百分比 0 到 100，纵轴为膝屈角 0 到 100 度。曲线自约 18 度上升至约 93 度。六个标记点表示 VGRF、股直肌、内侧腿后肌、股内侧肌、外侧腿后肌与膝外翻的峰值出现位置，全部位于 40 度以上。</desc>
+        </svg>
+      </div>
+      <div class="legend" id="legendLanding" aria-label="图例，点击可隐藏或显示对应系列"></div>
+      <p class="note" style="margin-top:10px">
+        纵轴膝屈角小于 40° 的浅色带为论文所述“ACL 损伤风险增高”区间；全部六个变量的峰值均落在该区间之外。<strong>曲线形状与标记点坐标为读图拟合所得（示意）</strong>，论文正文未逐点给出；精确数值见“统计附表”。
+      </p>
+    </article>
+
+    <article class="card" id="sec-bar">
+      <div class="chart-head">
+        <div>
+          <h2><span class="tag">图 6–7</span>性别 × 疲劳的组间对比</h2>
+          <p class="sub">柱高为均值，误差棒为正文给出的标准差（SD）。分组命名沿用论文原文 Pre-fatigue / Post-fatigue 与 Males / Females。</p>
+        </div>
+        <button class="btn" type="button" data-export="chartBar" data-name="图6-7_组间对比">导出 PNG</button>
+      </div>
+      <div class="svg-wrap">
+        <svg id="chartBar" viewBox="0 0 960 360" role="img" aria-labelledby="barTitle barDesc" preserveAspectRatio="xMidYMid meet">
+          <title id="barTitle">图 6 与图 7 复现：VGRF 峰值时与外侧腿后肌 NEMG 峰值时的膝屈角，按性别与疲劳状态分组</title>
+          <desc id="barDesc">左右两个柱状图。左图为 VGRF 峰值时的膝屈角：男性疲劳前 48.8 度、疲劳后 49.6 度；女性疲劳前 52.7 度、疲劳后 47.1 度。右图为外侧腿后肌 NEMG 峰值时的膝屈角：男性 62.2 度升至 73.7 度；女性 77.8 度降至 75.0 度。</desc>
+        </svg>
+      </div>
+      <div class="legend" id="legendBar" aria-label="图例，点击可隐藏或显示对应系列"></div>
+      <p class="note" style="margin-top:10px">
+        正文显著性：左图 VGRF 峰值时膝屈角的性别 × 疲劳交互 <strong>p &lt; 0.05</strong>；右图外侧腿后肌 NEMG 峰值时膝屈角的交互 <strong>p = 0.003</strong>。原图误差棒长度明显短于正文 SD，本页按<strong>正文 SD</strong> 绘制，差异已在“数据差异说明”中记录。
+      </p>
+    </article>
+
+    <article class="card" id="sec-inter">
+      <div class="chart-head">
+        <div>
+          <h2><span class="tag">交互</span>性别 × 疲劳：两条线的方向相反</h2>
+          <p class="sub">同一批均值改用折线表达，交叉即为交互效应的直观来源。</p>
+        </div>
+        <button class="btn" type="button" data-export="chartInter" data-name="性别x疲劳_交互效应">导出 PNG</button>
+      </div>
+      <div class="svg-wrap">
+        <svg id="chartInter" viewBox="0 0 960 380" role="img" aria-labelledby="interTitle interDesc" preserveAspectRatio="xMidYMid meet">
+          <title id="interTitle">性别与疲劳的交互效应折线图</title>
+          <desc id="interDesc">两个并排面板。左面板为 VGRF 峰值时膝屈角：男性由 48.8 升至 49.6，女性由 52.7 降至 47.1，两线交叉。右面板为外侧腿后肌 NEMG 峰值时膝屈角：男性由 62.2 升至 73.7，女性由 77.8 降至 75.0，两线交叉。</desc>
+        </svg>
+      </div>
+      <div class="legend" id="legendInter" aria-label="图例，点击可隐藏或显示对应系列"></div>
+      <p class="note" style="margin-top:10px">
+        男性两条线均上行、女性两条线均下行——这种方向性差异正是 MANOVA 中性别 × 疲劳交互项显著（F = 4.80，df = 7, 20，p &lt; 0.05）的具体表现。
+      </p>
+    </article>
+
+    <article class="card" id="sec-concl">
+      <h2><span class="tag">结论</span>论文自身得出的结论</h2>
+      <ol class="concl-list">
+        <li>本研究的分析对象不是峰值的大小，而是<strong>峰值出现时的膝屈角</strong>；所有变量峰值都出现在膝屈角大于 40° 的着陆后期，而不是 ACL 风险更高的着陆初期。</li>
+        <li>性别（p = 0.053）与疲劳（p = 0.119）对峰值出现时的膝屈角均无显著主效应，说明男女运动员、以及同一受试者疲劳前后的峰值位置相近。</li>
+        <li>但性别 × 疲劳交互显著：疲劳后<strong>女性 VGRF 峰值前移到更小的膝屈角</strong>（47.1°），更接近已知风险增高的角度区间；男性则略微后移。</li>
+        <li>因此，仅基于全周期峰值值的分析可能无法充分处理膝屈角对 ACL 拉力的影响——当膝屈角低于 40° 时 ACL 承受的拉力更高。</li>
+        <li>作者建议未来研究在着陆初期阶段按预定膝屈角测量，并检验更强烈的疲劳方案是否会进一步改变峰值 VGRF 对应的膝屈角。</li>
+      </ol>
+      <div class="callout blue" style="margin-top:14px">
+        <strong>论文自述的局限：</strong>疲劳方案未按个体运动能力归一化；双臂交叉贴胸 + 从箱上跳下的设置降低了结论的外推性；受试者均为休闲运动员，跳跃熟练度可能不一致；实验室测试中未发生实际 ACL 损伤，无法直接验证损伤机制。
+      </div>
+    </article>
+
+  </section>
+
+  <div class="resizer" id="rzRight" role="separator" aria-orientation="vertical" aria-label="调整右栏宽度" tabindex="0"></div>
+
+  <aside class="col col-right" aria-label="说明与统计附表">
+
+    <section class="card" id="sec-table">
+      <h2><span class="tag">数值</span>统计附表</h2>
+      <p class="sub">数值取自正文“结果”部分，单位为度（°）。括号内为标准差。</p>
+
+      <div class="tbl-wrap">
+        <table>
+          <caption>表 1　峰值出现时的膝屈角：均值（SD）与疲劳前后变化</caption>
+          <thead>
+            <tr>
+              <th scope="col">变量</th>
+              <th scope="col">性别</th>
+              <th scope="col" class="num">疲劳前</th>
+              <th scope="col" class="num">疲劳后</th>
+              <th scope="col" class="num">变化</th>
+              <th scope="col">显著性</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="rowgroup" rowspan="2">VGRF 峰值时膝屈角</th>
+              <td>男</td>
+              <td class="num">48.8 (±13)</td>
+              <td class="num">49.6 (±15)</td>
+              <td class="num">+0.8</td>
+              <td rowspan="2"><span class="sig">p &lt; 0.05</span><br><span class="badge">交互显著</span></td>
+            </tr>
+            <tr>
+              <td>女</td>
+              <td class="num">52.7 (±11)</td>
+              <td class="num">47.1 (±11)</td>
+              <td class="num">−5.6</td>
+            </tr>
+            <tr>
+              <th scope="rowgroup" rowspan="2">外侧腿后肌 NEMG 峰值时膝屈角</th>
+              <td>男</td>
+              <td class="num">62.2 (±19)</td>
+              <td class="num">73.7 (±21)</td>
+              <td class="num">+11.5</td>
+              <td rowspan="2"><span class="sig">p = 0.003</span><br><span class="badge">交互显著</span></td>
+            </tr>
+            <tr>
+              <td>女</td>
+              <td class="num">77.8 (±16)</td>
+              <td class="num">75.0 (±15)</td>
+              <td class="num">−2.8</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <caption>表 2　多变量重复测量方差分析（MANOVA）结果</caption>
+          <thead>
+            <tr>
+              <th scope="col">效应</th>
+              <th scope="col" class="num">df</th>
+              <th scope="col" class="num">F</th>
+              <th scope="col" class="num">p</th>
+              <th scope="col">判断</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">性别（男 / 女）</th><td class="num">7, 21</td><td class="num">2.44</td><td class="num">0.053</td><td class="ns">不显著</td></tr>
+            <tr><th scope="row">疲劳（前 / 后）</th><td class="num">7, 21</td><td class="num">1.91</td><td class="num">0.119</td><td class="ns">不显著</td></tr>
+            <tr><th scope="row">性别 × 疲劳</th><td class="num">7, 20</td><td class="num">4.80</td><td class="num">&lt; 0.05</td><td class="sig">显著</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <caption>表 3　受试者每周运动时长（正文可读数值）</caption>
+          <thead>
+            <tr><th scope="col">分组</th><th scope="col" class="num">均值（h/周）</th><th scope="col" class="num">SD</th><th scope="col" class="num">p</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">男性</th><td class="num">6.6</td><td class="num">3</td><td class="num" rowspan="2">0.77</td></tr>
+            <tr><th scope="row">女性</th><td class="num">7.1</td><td class="num">6</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px">表 3 的 SD 为正文原样数值；男女无差异（p = 0.77）。</p>
+    </section>
+
+    <section class="card" id="sec-check">
+      <h2><span class="tag">读图</span>读图清单</h2>
+      <p class="sub">一行一张图；读不清的内容如实标注，不作推测。</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption>表 4　六张图片的读图记录</caption>
+          <thead>
+            <tr>
+              <th scope="col">图</th>
+              <th scope="col">坐标轴 / 表头</th>
+              <th scope="col">可读出的内容</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">图 2<br><span class="note">非疲劳雄性</span></th>
+              <td>X：% of landing cycle 0–100<br>Y：Knee flexion angle 0–100°</td>
+              <td>单条上升曲线（约 20° → 93°）；6 个标记点：VGRF 约 (23%, 49°)、股直肌 (31%, 60°)、内侧腿后肌 (34%, 68°)、股内侧肌 (47%, 76°)、外侧腿后肌 (72%, 88°)、膝外翻 (72%, 88°)</td>
+            </tr>
+            <tr>
+              <th scope="row">图 3<br><span class="note">疲劳雄性</span></th>
+              <td>同图 2</td>
+              <td>曲线形状相近；VGRF 标记约 (25%, 50°)，股直肌 (33%, 60°)，内侧腿后肌 (38%, 66°)，股内侧肌 (45%, 73°)，外侧腿后肌与膝外翻约 (63%, 85°)</td>
+            </tr>
+            <tr>
+              <th scope="row">图 4<br><span class="note">非疲劳女性</span></th>
+              <td>同图 2</td>
+              <td>VGRF 标记约 (24%, 52°)，股直肌 (33%, 60°)，内侧腿后肌 (36%, 64°)，股内侧肌 (50%, 78°)，外侧腿后肌与膝外翻约 (75%, 90°)</td>
+            </tr>
+            <tr>
+              <th scope="row">图 5<br><span class="note">疲劳雌性</span></th>
+              <td>同图 2</td>
+              <td>曲线起点略低（约 16°）；VGRF 标记约 (21%, 47°)，股直肌 (32%, 62°)，内侧腿后肌 (34%, 64°)，股内侧肌 (44%, 74°)，外侧腿后肌与膝外翻约 (66%, 87°)</td>
+            </tr>
+            <tr>
+              <th scope="row">图 6</th>
+              <td>Y：Knee flexion angle 30–80°<br>X：Males / Females</td>
+              <td>4 根柱约 48.8 / 49.6 / 52.7 / 47.1，与正文完全对应；图上误差棒长度明显短于正文 SD</td>
+            </tr>
+            <tr>
+              <th scope="row">图 7</th>
+              <td>Y：Knee flexion angle 0–90°<br>X：Males / Females</td>
+              <td>4 根柱约 62.2 / 73.7 / 77.8 / 75.0，与正文对应；误差棒同样短于正文 SD</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px">
+        <strong>不可辨 / 缺失：</strong>受试者人数、年龄、身高体重、各组样本量；各曲线的逐点原始数据；误差棒所代表的具体统计量（正文仅给 SD，未说明图中误差棒类型）。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2><span class="tag">差异</span>数据差异说明</h2>
+      <p class="sub">正文与图之间、正文自身之间的不一致，按“以正文为准”处理。</p>
+      <div class="callout">
+        <strong>1. 图 2–5 标记点纵坐标与正文数值不一致。</strong>例如外侧腿后肌在图中位于约 85–90° 处，而正文给出其峰值时膝屈角为 62.2°（非疲劳男）/ 73.7°（疲劳男）/ 77.8°（非疲劳女）/ 75.0°（疲劳女）。本页图表保留读图位置以呈现图形结构，数值以正文为准。
+      </div>
+      <div class="callout" style="margin-top:10px">
+        <strong>2. 正文内部的两处小数差异。</strong>男性 VGRF 变化，正文一处写“增加 1°”，另一处写“增加 0.8°”，按均值计算为 +0.8°；男性外侧腿后肌变化，正文写“增加 11°”，按均值计算为 +11.5°。本页按均值计算值呈现，并保留正文原话。
+      </div>
+      <div class="callout" style="margin-top:10px">
+        <strong>3. 图 6–7 误差棒短于正文 SD。</strong>正文报告的是标准差（如 48.8 ± 13），而图中误差棒目测约为 ±4。本页柱状图按正文 SD 绘制。
+      </div>
+      <p class="note" style="margin-top:12px">
+        <strong>关于图表实现：</strong>为保证双击即可打开、断网也能查看与导出，本页图表使用内联 SVG 绘制，交互（悬浮数值、图例开关、导出 PNG）由原生 JavaScript 实现，不依赖任何外部脚本或 CDN。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2><span class="tag">术语</span>变量与缩写</h2>
+      <ul class="plain">
+        <li><strong>VGRF</strong>：地面垂直反作用力，已按体重归一化</li>
+        <li><strong>NEMG</strong>：归一化肌电振幅，以 20 cm 平台双侧着陆的最大线性包膜 EMG（3 次平均）为基准</li>
+        <li><strong>Knee valgus</strong>：膝外翻角</li>
+        <li><strong>Rectus femoris</strong>：股直肌；<strong>Vastus medialis</strong>：股内侧肌</li>
+        <li><strong>Medial / Lateral hamstrings</strong>：内侧 / 外侧腿后肌</li>
+        <li><strong>Pre-fatigue / Post-fatigue</strong>：疲劳前 / 疲劳后（沿用论文原分组名）</li>
+      </ul>
+    </section>
+
+  </aside>
+</main>
+
+<footer>
+  本页内容全部来自所提供论文正文页与图 2–7 六张图片；图中未出现的信息均标注为“论文未给出”，读图拟合部分已标注“示意”。
+</footer>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  try{
+    var NS = "http://www.w3.org/2000/svg";
+    var FONT = "system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    var COL = {
+      vgrf:"#1d4ed8",
+      rf:"#b45309",
+      mh:"#0e7490",
+      vm:"#7c3aed",
+      lh:"#be123c",
+      kv:"#a16207",
+      male:"#1d4ed8",
+      female:"#b45309",
+      pre:"#93c5fd",
+      post:"#1e3a8a",
+      line:"#475569",
+      grid:"#e8edf3",
+      axis:"#94a3b8",
+      ink:"#0f172a",
+      ink2:"#475569",
+      ink3:"#94a3b8",
+      risk:"#fef3c7"
+    };
+
+    var SERIES = [
+      {key:"vgrf", label:"VGRF",              color:COL.vgrf, shape:"square-filled"},
+      {key:"rf",   label:"Rectus femoris",    color:COL.rf,   shape:"diamond-filled"},
+      {key:"mh",   label:"Medial hamstrings", color:COL.mh,   shape:"triangle-filled"},
+      {key:"vm",   label:"Vastus medialis",   color:COL.vm,   shape:"circle-open"},
+      {key:"lh",   label:"Lateral hamstrings",color:COL.lh,   shape:"square-open"},
+      {key:"kv",   label:"Knee valgus",       color:COL.kv,   shape:"triangle-open"}
+    ];
+
+    var CURVE = [[0,18],[4,23],[8,29],[12,36],[16,42],[20,47],[24,51],[28,55],[32,61],[36,67],[40,71],[45,74],[50,77],[55,80],[60,83],[65,85],[70,87],[75,88.5],[80,90],[85,91],[90,91.8],[95,92.5],[100,93]];
+
+    var PANELS = [
+      {title:"图2 · 非疲劳 · 男性", start:20, m:{vgrf:[23,49],rf:[31,60],mh:[34,68],vm:[47,76],lh:[72,88],kv:[72,88]}},
+      {title:"图3 · 疲劳 · 男性",   start:20, m:{vgrf:[25,50],rf:[33,60],mh:[38,66],vm:[45,73],lh:[63,85],kv:[63,85]}},
+      {title:"图4 · 非疲劳 · 女性", start:20, m:{vgrf:[24,52],rf:[33,60],mh:[36,64],vm:[50,78],lh:[75,90],kv:[75,90]}},
+      {title:"图5 · 疲劳 · 女性",   start:16, m:{vgrf:[21,47],rf:[32,62],mh:[34,64],vm:[44,74],lh:[66,87],kv:[66,87]}}
+    ];
+
+    var hidden = {landing:{}, bar:{}, inter:{}};
+
+    function el(tag, attrs, text){
+      var n = document.createElementNS(NS, tag);
+      if(attrs){ for(var k in attrs){ if(Object.prototype.hasOwnProperty.call(attrs,k)) n.setAttribute(k, attrs[k]); } }
+      if(text !== undefined && text !== null) n.textContent = text;
+      return n;
+    }
+    function txt(x, y, s, o){
+      o = o || {};
+      return el("text", {
+        x:x, y:y,
+        "font-family":FONT,
+        "font-size":o.size || 11,
+        "font-weight":o.weight || 400,
+        fill:o.fill || COL.ink2,
+        "text-anchor":o.anchor || "start",
+        "dominant-baseline":o.baseline || "auto"
+      }, s);
+    }
+    function smooth(pts){
+      if(!pts.length) return "";
+      var d = "M" + pts[0][0].toFixed(2) + "," + pts[0][1].toFixed(2);
+      for(var i=0;i<pts.length-1;i++){
+        var p0 = pts[i-1] || pts[i], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2] || pts[i+1];
+        var c1x = p1[0] + (p2[0]-p0[0])/6, c1y = p1[1] + (p2[1]-p0[1])/6;
+        var c2x = p2[0] - (p3[0]-p1[0])/6, c2y = p2[1] - (p3[1]-p1[1])/6;
+        d += " C" + c1x.toFixed(2) + "," + c1y.toFixed(2) + " " + c2x.toFixed(2) + "," + c2y.toFixed(2) + " " + p2[0].toFixed(2) + "," + p2[1].toFixed(2);
+      }
+      return d;
+    }
+    function marker(kind, cx, cy, color){
+      var g = el("g", {});
+      if(kind === "square-filled"){
+        g.appendChild(el("rect", {x:cx-3.4, y:cy-3.4, width:6.8, height:6.8, fill:color}));
+      }else if(kind === "diamond-filled"){
+        g.appendChild(el("polygon", {points:cx+","+(cy-4.6)+" "+(cx+4.6)+","+cy+" "+cx+","+(cy+4.6)+" "+(cx-4.6)+","+cy, fill:color}));
+      }else if(kind === "triangle-filled"){
+        g.appendChild(el("polygon", {points:cx+","+(cy-4.8)+" "+(cx+4.8)+","+(cy+3.6)+" "+(cx-4.8)+","+(cy+3.6), fill:color}));
+      }else if(kind === "circle-open"){
+        g.appendChild(el("circle", {cx:cx, cy:cy, r:4, fill:"#fff", stroke:color, "stroke-width":1.7}));
+      }else if(kind === "square-open"){
+        g.appendChild(el("rect", {x:cx-3.8, y:cy-3.8, width:7.6, height:7.6, fill:"#fff", stroke:color, "stroke-width":1.7}));
+      }else{
+        g.appendChild(el("polygon", {points:cx+","+(cy-5.2)+" "+(cx+5.2)+","+(cy+4.2)+" "+(cx-5.2)+","+(cy+4.2), fill:"#fff", stroke:color, "stroke-width":1.7}));
+      }
+      return g;
+    }
+
+    /* ---------- 图 2–5 四联曲线 ---------- */
+    var LP = [
+      {x:82,  y:62},
+      {x:556, y:62},
+      {x:82,  y:398},
+      {x:556, y:398}
+    ];
+    var PW = 372, PH = 246;
+    var landingGeom = [];
+
+    function drawLanding(){
+      var svg = document.getElementById("chartLanding");
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      landingGeom = [];
+      svg.appendChild(el("title", {id:"landingTitle"}, "图 2 至图 5 复现：着陆周期百分比与膝屈角关系，以及六个生物力学变量峰值出现的位置"));
+      svg.appendChild(el("desc", {id:"landingDesc"}, "四联折线图，横轴为着陆周期百分比 0 到 100，纵轴为膝屈角 0 到 100 度。曲线自约 18 度上升至约 93 度。六个标记点表示 VGRF、股直肌、内侧腿后肌、股内侧肌、外侧腿后肌与膝外翻的峰值出现位置，全部位于 40 度以上。"));
+
+      var defs = el("defs", {});
+      svg.appendChild(defs);
+
+      var yLab = txt(0, 0, "Knee flexion angle (degrees)", {size:12.5, weight:600, fill:COL.ink2, anchor:"middle"});
+      yLab.setAttribute("transform", "rotate(-90 22 350)");
+      yLab.setAttribute("x", "22");
+      yLab.setAttribute("y", "350");
+      svg.appendChild(yLab);
+
+      PANELS.forEach(function(p, i){
+        var g0 = LP[i];
+        var x0 = g0.x, y0 = g0.y;
+
+        function px(v){ return x0 + (v/100)*PW; }
+        function py(v){ return y0 + PH - (v/100)*PH; }
+
+        landingGeom.push({x0:x0, y0:y0, px:px, py:py});
+
+        var g = el("g", {});
+
+        // 风险区（<40°）
+        g.appendChild(el("rect", {
+          x:x0, y:py(40), width:PW, height:(y0+PH)-py(40),
+          fill:COL.risk, opacity:0.55
+        }));
+
+        // 网格
+        for(var v=0; v<=100; v+=10){
+          g.appendChild(el("line", {
+            x1:x0, y1:py(v), x2:x0+PW, y2:py(v),
+            stroke:COL.grid, "stroke-width": v===0 ? 0 : 1
+          }));
+          g.appendChild(txt(x0-8, py(v)+3.5, String(v), {size:11, fill:COL.ink3, anchor:"end"}));
+        }
+        for(var h=0; h<=100; h+=20){
+          g.appendChild(el("line", {
+            x1:px(h), y1:y0, x2:px(h), y2:y0+PH,
+            stroke:COL.grid, "stroke-width":1
+          }));
+          if(i >= 2){
+            g.appendChild(txt(px(h), y0+PH+15, String(h), {size:11, fill:COL.ink3, anchor:"middle"}));
+          }
+        }
+
+        // 边框
+        g.appendChild(el("rect", {x:x0, y:y0, width:PW, height:PH, fill:"none", stroke:"#cbd5e1", "stroke-width":1}));
+
+        // 40° 参考线
+        g.appendChild(el("line", {
+          x1:x0, y1:py(40), x2:x0+PW, y2:py(40),
+          stroke:"#d97706", "stroke-width":1.3, "stroke-dasharray":"5 4"
+        }));
+
+        // 曲线
+        var pts = CURVE.map(function(d){ return [px(d[0]), py(d[1] + (p.start - 18) * (1 - d[0]/100))]; });
+        g.appendChild(el("path", {
+          d: smooth(pts), fill:"none", stroke:COL.line, "stroke-width":2, "stroke-linecap":"round"
+        }));
+
+        // 标记点
+        SERIES.forEach(function(s){
+          if(hidden.landing[s.key]) return;
+          var m = p.m[s.key];
+          if(!m) return;
+          g.appendChild(marker(s.shape, px(m[0]), py(m[1]), s.color));
+        });
+
+        // 标题
+        g.appendChild(txt(x0, y0-14, p.title, {size:14, weight:700, fill:COL.ink}));
+
+        // 联动线容器
+        var ln = el("line", {
+          x1:x0, y1:y0, x2:x0, y2:y0+PH,
+          stroke:"#1d4ed8", "stroke-width":1.2, "stroke-dasharray":"4 3", opacity:0
+        });
+        ln.setAttribute("class", "crosshair");
+        g.appendChild(ln);
+
+        svg.appendChild(g);
+      });
+
+      // 全局轴标签
+      svg.appendChild(txt(82 + PW/2, 690, "% of landing cycle", {size:12.5, weight:600, fill:COL.ink2, anchor:"middle"}));
+      svg.appendChild(txt(556 + PW/2, 690, "% of landing cycle", {size:12.5, weight:600, fill:COL.ink2, anchor:"middle"}));
+
+      // 风险区标注
+      var note = txt(556 + PW - 4, py0(40) - 6, "论文所述 ACL 风险增高区（< 40°）", {size:10, fill:"#92400e", anchor:"end", weight:600});
+      svg.appendChild(note);
+
+      function py0(v){ return 398 + PH - (v/100)*PH; }
+
+      // 悬浮联动
+      var tip = document.getElementById("tip");
+      svg.onpointermove = function(e){
+        var r = svg.getBoundingClientRect();
+        if(!r.width) return;
+        var sx = (e.clientX - r.left) / r.width * 960;
+        var sy = (e.clientY - r.top) / r.height * 700;
+        var hit = -1;
+        for(var i=0;i<landingGeom.length;i++){
+          var G = landingGeom[i];
+          if(sx >= G.x0 && sx <= G.x0+PW && sy >= G.y0 && sy <= G.y0+PH){ hit = i; break; }
+        }
+        var lines = svg.querySelectorAll(".crosshair");
+        if(hit < 0){
+          for(var k=0;k<lines.length;k++) lines[k].setAttribute("opacity","0");
+          tip.classList.remove("on");
+          return;
+        }
+        var G = landingGeom[hit];
+        var pct = Math.max(0, Math.min(100, (sx - G.x0) / PW * 100));
+        var ang = interpolate(pct);
+        for(var j=0;j<lines.length;j++){
+          lines[j].setAttribute("x1", G.px(pct));
+          lines[j].setAttribute("x2", G.px(pct));
+          lines[j].setAttribute("opacity", j===hit ? "0.85" : "0.28");
+        }
+        tip.innerHTML = "<b>" + PANELS[hit].title + "</b><div class='t-row'><span>着陆进度</span><span>" + pct.toFixed(1) + " %</span></div><div class='t-row'><span>膝屈角</span><span>" + ang.toFixed(1) + " °</span></div>";
+        tip.style.left = e.clientX + "px";
+        tip.style.top = e.clientY + "px";
+        tip.classList.add("on");
+      };
+      svg.onpointerleave = function(){
+        var lines = svg.querySelectorAll(".crosshair");
+        for(var k=0;k<lines.length;k++) lines[k].setAttribute("opacity","0");
+        document.getElementById("tip").classList.remove("on");
+      };
+    }
+
+    function interpolate(pct){
+      for(var i=0;i<CURVE.length-1;i++){
+        var a = CURVE[i], b = CURVE[i+1];
+        if(pct >= a[0] && pct <= b[0]){
+          var t = (pct - a[0]) / (b[0] - a[0]);
+          return a[1] + t * (b[1] - a[1]);
+        }
+      }
+      return CURVE[CURVE.length-1][1];
+    }
+
+    /* ---------- 图 6–7 柱状图 ---------- */
+    var BAR_DATA = [
+      {
+        key:"fig6",
+        title:"图6 · VGRF 峰值时的膝屈角",
+        yMin:30, yMax:80,
+        sig:"Sex × Fatigue: p < 0.05",
+        groups:[
+          {name:"Males",   pre:48.8, preSD:13, post:49.6, postSD:15},
+          {name:"Females", pre:52.7, preSD:11, post:47.1, postSD:11}
+        ]
+      },
+      {
+        key:"fig7",
+        title:"图7 · 外侧腿后肌 NEMG 峰值时的膝屈角",
+        yMin:0, yMax:100,
+        sig:"Sex × Fatigue: p = 0.003",
+        groups:[
+          {name:"Males",   pre:62.2, preSD:19, post:73.7, postSD:21},
+          {name:"Females", pre:77.8, preSD:16, post:75.0, postSD:15}
+        ]
+      }
+    ];
+
+    function drawBar(){
+      var svg = document.getElementById("chartBar");
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.appendChild(el("title", {id:"barTitle"}, "图 6 与图 7 复现：VGRF 峰值时与外侧腿后肌 NEMG 峰值时的膝屈角，按性别与疲劳状态分组"));
+      svg.appendChild(el("desc", {id:"barDesc"}, "左右两个柱状图。左图为 VGRF 峰值时的膝屈角：男性疲劳前 48.8 度、疲劳后 49.6 度；女性疲劳前 52.7 度、疲劳后 47.1 度。右图为外侧腿后肌 NEMG 峰值时的膝屈角：男性 62.2 度升至 73.7 度；女性 77.8 度降至 75.0 度。"));
+
+      BAR_DATA.forEach(function(d, idx){
+        var ox = idx === 0 ? 40 : 520;
+        var x0 = ox + 46, y0 = 46, w = 340, h = 250;
+
+        function py(v){ return y0 + h - ((v - d.yMin) / (d.yMax - d.yMin)) * h; }
+
+        var g = el("g", {});
+
+        g.appendChild(txt(x0, y0-26, d.title, {size:14, weight:700, fill:COL.ink}));
+
+        var step = d.yMax - d.yMin <= 50 ? 5 : 10;
+        for(var v=d.yMin; v<=d.yMax; v+=step){
+          g.appendChild(el("line", {x1:x0, y1:py(v), x2:x0+w, y2:py(v), stroke:COL.grid, "stroke-width":1}));
+          g.appendChild(txt(x0-8, py(v)+3.5, String(v), {size:11, fill:COL.ink3, anchor:"end"}));
+        }
+        g.appendChild(el("line", {x1:x0, y1:y0, x2:x0, y2:y0+h, stroke:"#cbd5e1", "stroke-width":1}));
+        g.appendChild(el("line", {x1:x0, y1:y0+h, x2:x0+w, y2:y0+h, stroke:"#cbd5e1", "stroke-width":1}));
+
+        var centers = [x0 + w*0.28, x0 + w*0.74];
+        var bw = 34;
+
+        d.groups.forEach(function(grp, gi){
+          var cx = centers[gi];
+          var bars = [
+            {v:grp.pre,  sd:grp.preSD,  x:cx - bw - 3, color:COL.pre,  label:"Pre-fatigue"},
+            {v:grp.post, sd:grp.postSD, x:cx + 3,       color:COL.post, label:"Post-fatigue"}
+          ];
+          bars.forEach(function(b){
+            if(hidden.bar[b.label]) return;
+            var top = py(b.v);
+            g.appendChild(el("rect", {
+              x:b.x, y:top, width:bw, height:Math.max(0, y0+h-top),
+              fill:b.color, rx:3
+            }));
+            // 误差棒
+            var hi = py(b.v + b.sd), lo = py(b.v - b.sd);
+            var mid = b.x + bw/2;
+            g.appendChild(el("line", {x1:mid, y1:hi, x2:mid, y2:lo, stroke:COL.ink, "stroke-width":1.4}));
+            g.appendChild(el("line", {x1:mid-6, y1:hi, x2:mid+6, y2:hi, stroke:COL.ink, "stroke-width":1.4}));
+            g.appendChild(el("line", {x1:mid-6, y1:lo, x2:mid+6, y2:lo, stroke:COL.ink, "stroke-width":1.4}));
+            // 数值
+            g.appendChild(txt(mid, Math.min(hi, top) - 8, b.v.toFixed(1), {
+              size:11, weight:700, fill:COL.ink, anchor:"middle"
+            }));
+          });
+          g.appendChild(txt(cx, y0+h+18, grp.name, {size:12.5, weight:600, fill:COL.ink2, anchor:"middle"}));
+        });
+
+        // 显著性
+        g.appendChild(txt(x0 + w, y0-8, d.sig, {size:11, weight:700, fill:"#92400e", anchor:"end"}));
+
+        // Y 轴标签
+        var yl = txt(0, 0, "Knee flexion angle (degrees)", {size:10.5, weight:600, fill:COL.ink2, anchor:"middle"});
+        yl.setAttribute("transform", "rotate(-90 " + (ox+12) + " " + (y0+h/2) + ")");
+        yl.setAttribute("x", String(ox+12));
+        yl.setAttribute("y", String(y0+h/2));
+        g.appendChild(yl);
+
+        svg.appendChild(g);
+      });
+    }
+
+    /* ---------- 交互效应折线 ---------- */
+    var INTER = [
+      {
+        title:"VGRF 峰值时膝屈角",
+        yMin:44, yMax:56,
+        male:[48.8, 49.6],
+        female:[52.7, 47.1]
+      },
+      {
+        title:"外侧腿后肌 NEMG 峰值时膝屈角",
+        yMin:56, yMax:82,
+        male:[62.2, 73.7],
+        female:[77.8, 75.0]
+      }
+    ];
+
+    function drawInter(){
+      var svg = document.getElementById("chartInter");
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.appendChild(el("title", {id:"interTitle"}, "性别与疲劳的交互效应折线图"));
+      svg.appendChild(el("desc", {id:"interDesc"}, "两个并排面板。左面板为 VGRF 峰值时膝屈角：男性由 48.8 升至 49.6，女性由 52.7 降至 47.1，两线交叉。右面板为外侧腿后肌 NEMG 峰值时膝屈角：男性由 62.2 升至 73.7，女性由 77.8 降至 75.0，两线交叉。"));
+
+      INTER.forEach(function(d, idx){
+        var ox = idx === 0 ? 40 : 520;
+        var x0 = ox + 56, y0 = 50, w = 320, h = 240;
+
+        function py(v){ return y0 + h - ((v - d.yMin) / (d.yMax - d.yMin)) * h; }
+        function px(i){ return x0 + (i === 0 ? 0 : w); }
+
+        var g = el("g", {});
+        g.appendChild(txt(x0 - 6, y0-28, d.title, {size:14, weight:700, fill:COL.ink}));
+
+        var step = (d.yMax - d.yMin) <= 14 ? 2 : 5;
+        for(var v=d.yMin; v<=d.yMax; v+=step){
+          g.appendChild(el("line", {x1:x0, y1:py(v), x2:x0+w, y2:py(v), stroke:COL.grid, "stroke-width":1}));
+          g.appendChild(txt(x0-8, py(v)+3.5, String(v), {size:11, fill:COL.ink3, anchor:"end"}));
+        }
+        g.appendChild(el("line", {x1:x0, y1:y0+h, x2:x0+w, y2:y0+h, stroke:"#cbd5e1", "stroke-width":1}));
+
+        ["Pre-fatigue","Post-fatigue"].forEach(function(lab, i){
+          g.appendChild(txt(px(i), y0+h+18, lab, {size:11, weight:600, fill:COL.ink2, anchor:"middle"}));
+        });
+
+        [
+          {key:"male",   name:"Males",   vals:d.male,   color:COL.male},
+          {key:"female", name:"Females", vals:d.female, color:COL.female}
+        ].forEach(function(s){
+          if(hidden.inter[s.name]) return;
+          g.appendChild(el("line", {
+            x1:px(0), y1:py(s.vals[0]), x2:px(1), y2:py(s.vals[1]),
+            stroke:s.color, "stroke-width":2.6, "stroke-linecap":"round"
+          }));
+          s.vals.forEach(function(v, i){
+            g.appendChild(el("circle", {cx:px(i), cy:py(v), r:5, fill:"#fff", stroke:s.color, "stroke-width":2.4}));
+            g.appendChild(txt(px(i) + (i === 0 ? -9 : 9), py(v) - 11, v.toFixed(1), {
+              size:10.5, weight:700, fill:s.color, anchor: i === 0 ? "end" : "start"
+            }));
+          });
+        });
+
+        var yl = txt(0, 0, "Knee flexion angle (degrees)", {size:10.5, weight:600, fill:COL.ink2, anchor:"middle"});
+        yl.setAttribute("transform", "rotate(-90 " + (ox+16) + " " + (y0+h/2) + ")");
+        yl.setAttribute("x", String(ox+16));
+        yl.setAttribute("y", String(y0+h/2));
+        g.appendChild(yl);
+
+        svg.appendChild(g);
+      });
+    }
+
+    /* ---------- 图例 ---------- */
+    function buildLegend(containerId, items, group){
+      var box = document.getElementById(containerId);
+      if(!box) return;
+      box.innerHTML = "";
+      items.forEach(function(it){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "lg";
+        b.setAttribute("aria-pressed", "true");
+        var sw = document.createElement("span");
+        sw.className = "sw";
+        sw.style.background = it.color;
+        sw.style.borderRadius = it.round ? "50%" : "2px";
+        b.appendChild(sw);
+        b.appendChild(document.createTextNode(it.label));
+        b.addEventListener("click", function(){
+          var key = it.key;
+          hidden[group][key] = !hidden[group][key];
+          b.classList.toggle("off", !!hidden[group][key]);
+          b.setAttribute("aria-pressed", hidden[group][key] ? "false" : "true");
+          if(group === "landing") drawLanding();
+          if(group === "bar") drawBar();
+          if(group === "inter") drawInter();
+        });
+        box.appendChild(b);
+      });
+    }
+
+    /* ---------- 导出 PNG ---------- */
+    function exportPNG(svgId, name){
+      var svg = document.getElementById(svgId);
+      if(!svg) return;
+      var clone = svg.cloneNode(true);
+      clone.setAttribute("xmlns", NS);
+      clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+      var vb = (svg.getAttribute("viewBox") || "0 0 960 700").split(/\s+/).map(Number);
+      var W = vb[2], H = vb[3];
+      var bg = document.createElementNS(NS, "rect");
+      bg.setAttribute("x", vb[0]); bg.setAttribute("y", vb[1]);
+      bg.setAttribute("width", W); bg.setAttribute("height", H);
+      bg.setAttribute("fill", "#ffffff");
+      clone.insertBefore(bg, clone.firstChild);
+
+      var data = new XMLSerializer().serializeToString(clone);
+      var blob = new Blob([data], {type:"image/svg+xml;charset=utf-8"});
+      var url = URL.createObjectURL(blob);
+      var img = new Image();
+      img.onload = function(){
+        try{
+          var scale = 3;
+          var canvas = document.createElement("canvas");
+          canvas.width = Math.round(W * scale);
+          canvas.height = Math.round(H * scale);
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function(b){
+            if(!b) return;
+            var a = document.createElement("a");
+            var u = URL.createObjectURL(b);
+            a.href = u;
+            a.download = name + ".png";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function(){ URL.revokeObjectURL(u); }, 2000);
+          }, "image/png");
+        }catch(err){
+          URL.revokeObjectURL(url);
+        }
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); };
+      img.src = url;
+    }
+
+    /* ---------- 分栏拖拽 ---------- */
+    function initResizer(elId, cssVar, min, max, sign){
+      var handle = document.getElementById(elId);
+      if(!handle) return;
+      var dragging = false;
+      var startX = 0, startW = 0;
+
+      function currentW(){
+        var v = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+        return parseInt(v, 10) || min;
+      }
+      function onDown(e){
+        dragging = true;
+        startX = e.clientX;
+        startW = currentW();
+        handle.classList.add("dragging");
+        handle.setPointerCapture && handle.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      }
+      function onMove(e){
+        if(!dragging) return;
+        var delta = (e.clientX - startX) * sign;
+        var w = Math.max(min, Math.min(max, startW + delta));
+        document.documentElement.style.setProperty(cssVar, w + "px");
+      }
+      function onUp(){
+        dragging = false;
+        handle.classList.remove("dragging");
+      }
+      handle.addEventListener("pointerdown", onDown);
+      handle.addEventListener("pointermove", onMove);
+      handle.addEventListener("pointerup", onUp);
+      handle.addEventListener("pointercancel", onUp);
+      handle.addEventListener("keydown", function(e){
+        var w = currentW();
+        var stepSize = 16;
+        if(e.key === "ArrowLeft"){
+          w = Math.max(min, w - stepSize * sign);
+          document.documentElement.style.setProperty(cssVar, w + "px");
+          e.preventDefault();
+        }else if(e.key === "ArrowRight"){
+          w = Math.min(max, w + stepSize * sign);
+          document.documentElement.style.setProperty(cssVar, w + "px");
+          e.preventDefault();
+        }
+      });
+    }
+
+    /* ---------- 锚点平滑滚动 ---------- */
+    function initAnchors(){
+      var links = document.querySelectorAll('a[href^="#"]');
+      for(var i=0;i<links.length;i++){
+        links[i].addEventListener("click", function(e){
+          var id = this.getAttribute("href").slice(1);
+          var target = document.getElementById(id);
+          if(!target) return;
+          e.preventDefault();
+          target.scrollIntoView({behavior:"smooth", block:"start"});
+          if(history.replaceState) history.replaceState(null, "", "#" + id);
+        });
+      }
+    }
+
+    /* ---------- 初始化 ---------- */
+    drawLanding();
+    drawBar();
+    drawInter();
+
+    buildLegend("legendLanding", SERIES.map(function(s){ return {key:s.key, label:s.label, color:s.color}; }), "landing");
+    buildLegend("legendBar", [
+      {key:"Pre-fatigue",  label:"Pre-fatigue",  color:COL.pre},
+      {key:"Post-fatigue", label:"Post-fatigue", color:COL.post}
+    ], "bar");
+    buildLegend("legendInter", [
+      {key:"Males",   label:"Males",   color:COL.male,   round:true},
+      {key:"Females", label:"Females", color:COL.female, round:true}
+    ], "inter");
+
+    initResizer("rzLeft", "--left-w", 190, 400, 1);
+    initResizer("rzRight", "--right-w", 280, 560, -1);
+    initAnchors();
+
+    var btns = document.querySelectorAll("[data-export]");
+    for(var i=0;i<btns.length;i++){
+      (function(b){
+        b.addEventListener("click", function(){
+          exportPNG(b.getAttribute("data-export"), b.getAttribute("data-name") || "chart");
+        });
+      })(btns[i]);
+    }
+
+  }catch(err){
+    if(window.console && console.error) console.error(err);
+  }
+})();
+</script>
+</body>
+</html>

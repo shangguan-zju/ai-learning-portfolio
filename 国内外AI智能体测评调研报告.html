@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国内外AI智能体测评调研报告</title>
+<style>
+:root{--ink:#18243a;--muted:#64748b;--blue:#2563eb;--cyan:#06b6d4;--purple:#7c3aed;--green:#059669;--orange:#ea580c;--line:#dbe5f2;--bg:#f3f7fc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;line-height:1.7}
+.hero{padding:58px 7vw 48px;background:linear-gradient(120deg,#102a56,#2457a6 55%,#6d5bd0);color:white}
+.hero .tag{display:inline-block;padding:5px 12px;border:1px solid #ffffff66;border-radius:30px;font-size:13px;letter-spacing:1px}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.25;margin:18px 0 12px}.hero p{max-width:850px;color:#e4edff;margin:0}
+.meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.meta span{background:#ffffff18;border:1px solid #ffffff38;border-radius:8px;padding:7px 12px;font-size:13px}
+main{max-width:1200px;margin:28px auto;padding:0 22px}.section{background:white;border:1px solid var(--line);border-radius:16px;padding:26px;margin:22px 0;box-shadow:0 6px 22px #17345c0a}
+h2{font-size:23px;margin:0 0 14px;padding-left:12px;border-left:5px solid var(--blue)}h3{font-size:17px;margin:18px 0 8px;color:#1d3e70}
+.lead{color:var(--muted);margin-top:-4px}.callout{background:#eff6ff;border-left:4px solid var(--blue);padding:14px 17px;border-radius:8px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.metric{padding:17px;border-radius:12px;background:linear-gradient(145deg,#f0f6ff,#fbfdff);border:1px solid #dce9fb}.metric b{display:block;font-size:25px;color:var(--blue)}.metric small{color:var(--muted)}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;overflow:hidden;border:1px solid var(--line);border-radius:11px}th{background:#183b70;color:white;text-align:left;padding:12px 11px;white-space:nowrap}td{padding:11px;border-bottom:1px solid var(--line);vertical-align:top}tr:nth-child(even) td{background:#f6f9fe}tr:last-child td{border-bottom:0}.domestic{color:#087e8b;font-weight:700}.foreign{color:#6842bd;font-weight:700}.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;background:#e8f1ff;color:#2455a5;white-space:nowrap}.score{font-weight:800;color:#1456a0}.bar{height:8px;background:#e7edf6;border-radius:20px;overflow:hidden;min-width:75px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#20b6c7,#356be8);border-radius:20px}.note{font-size:12px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:14px}.card{border:1px solid var(--line);border-radius:12px;padding:17px;background:#fff}.card h3{margin:0 0 5px}.card .kind{font-size:12px;color:var(--muted)}.card p{font-size:14px;margin:9px 0}.card .scores{display:flex;gap:7px;flex-wrap:wrap}.scores span{font-size:12px;background:#eef4ff;color:#234e91;padding:4px 8px;border-radius:6px}
+.good{color:#07845c;font-weight:700}.warn{color:#c15b12;font-weight:700}
+footer{max-width:1200px;margin:0 auto;padding:0 22px 40px;color:var(--muted);font-size:13px}
+a{color:#1d5fc2;text-decoration:none}a:hover{text-decoration:underline}
+@media(max-width:760px){.section{padding:18px;margin:14px 0}table{display:block;overflow-x:auto;white-space:normal}.hero{padding:40px 22px}}
+@media print{body{background:white}.section{box-shadow:none;break-inside:avoid}.hero{print-color-adjust:exact;-webkit-print-color-adjust:exact}th{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header class="hero">
+ <span class="tag">AI AGENT · RESEARCH REPORT</span>
+ <h1>国内外主流 AI 智能体<br>测评与发展趋势调研</h1>
+ <p>从任务执行能力、成长性、使用成本与应用生态出发，对国内外代表性智能体产品进行横向分析，为学习、办公和智能体应用选型提供参考。</p>
+ <div class="meta"><span>调研类型：课程作业 / 产品测评</span><span>调研时间：2026年11月</span><span>分析维度：能力 · 成长性 · 性价比</span></div>
+</header>
+<main>
+<section class="section">
+ <h2>01｜研究背景与评价方法</h2>
+ <p>AI智能体（AI Agent）是能够围绕目标进行任务规划、调用工具、执行多步骤操作，并根据执行结果调整行动的人工智能系统。与传统聊天机器人相比，智能体更强调“完成任务”，而不只是“生成答案”。</p>
+ <div class="callout"><b>本报告的核心问题：</b>谁更擅长把复杂目标转化为可交付结果？谁更值得长期投入？普通学生或个人用户怎样以较低成本获得实际价值？</div>
+ <div class="grid">
+  <div class="metric"><b>40%</b><small>综合任务能力权重：理解、规划、工具调用、执行与结果质量</small></div>
+  <div class="metric"><b>30%</b><small>成长性权重：技术迭代、生态开放、扩展能力与场景潜力</small></div>
+  <div class="metric"><b>30%</b><small>性价比权重：免费可用性、付费门槛、部署成本与学习成本</small></div>
+ </div>
+ <p class="note">说明：下文评分是基于公开产品定位、功能资料及行业评测维度形成的研究性主观估分，不是实验室实测成绩，也不代表官方排名。不同产品类别存在差异，评分用于辅助选型。</p>
+</section>
+
+<section class="section">
+ <h2>02｜国内外代表产品概览</h2>
+ <table>
+ <thead><tr><th>地区</th><th>产品</th><th>产品类型</th><th>核心定位与特点</th><th>适合场景</th></tr></thead>
+ <tbody>
+ <tr><td class="domestic">国内</td><td><b>扣子 Coze</b></td><td>智能体搭建平台</td><td>可视化创建智能体，支持工作流、知识库和插件等能力，降低开发门槛。</td><td>课程项目、客服机器人、内容工作流</td></tr>
+ <tr><td class="domestic">国内</td><td><b>Kimi</b></td><td>通用助手 / Agent应用</td><td>擅长中文交互、长文本与资料处理，适合研究、总结和复杂信息整理。</td><td>论文辅助、资料分析、报告写作</td></tr>
+ <tr><td class="domestic">国内</td><td><b>Manus</b></td><td>通用任务执行型Agent</td><td>强调自主拆解任务、调用工具和交付成果，面向较完整的线上任务流程。</td><td>调研、资料搜集、网页与办公任务</td></tr>
+ <tr><td class="domestic">国内</td><td><b>通义千问 / 百炼</b></td><td>模型 + Agent开发平台</td><td>模型能力与云端开发服务结合，便于接入企业数据、工具和业务系统。</td><td>企业应用、知识问答、业务自动化</td></tr>
+ <tr><td class="foreign">海外</td><td><b>ChatGPT Agent</b></td><td>通用任务执行型Agent</td><td>结合推理、网页操作和工具使用，适合多步骤研究与办公任务。</td><td>信息调研、计划制定、复杂办公</td></tr>
+ <tr><td class="foreign">海外</td><td><b>Claude</b></td><td>模型 / 编程与工作流Agent</td><td>重视长上下文、代码理解和复杂文本任务，在开发与知识工作中有优势。</td><td>代码开发、文档分析、复杂推理</td></tr>
+ <tr><td class="foreign">海外</td><td><b>Google Gemini</b></td><td>多模态模型 / Agent生态</td><td>与Google生态结合，多模态理解和跨应用协同是重要发展方向。</td><td>多模态处理、信息整理、办公协作</td></tr>
+ <tr><td class="foreign">开源生态</td><td><b>Dify</b></td><td>开源智能体应用开发平台</td><td>支持工作流、模型接入、知识库和应用部署，适合定制化构建。</td><td>私有知识库、原型开发、企业内部应用</td></tr>
+ </tbody></table>
+ <p class="note">分类提示：Dify属于开发平台，不是与通用助手完全同类的终端产品；Manus、ChatGPT Agent更偏向“替用户执行任务”。</p>
+</section>
+
+<section class="section">
+ <h2>03｜核心能力横向测评</h2>
+ <p class="lead">按普通用户可感知的实际任务表现进行研究性评分，满分10分。分数是分析估值，不是同一测试集上的跑分。</p>
+ <table>
+ <thead><tr><th>产品</th><th>任务执行</th><th>中文体验</th><th>工具 / 工作流</th><th>上手难度</th><th>综合能力</th></tr></thead>
+ <tbody>
+ <tr><td><b>扣子 Coze</b></td><td>7.5</td><td>9.0</td><td>9.0</td><td>较低</td><td class="score">8.3</td></tr>
+ <tr><td><b>Kimi</b></td><td>7.5</td><td>9.5</td><td>7.5</td><td>低</td><td class="score">8.2</td></tr>
+ <tr><td><b>Manus</b></td><td>9.0</td><td>8.5</td><td>8.5</td><td>低</td><td class="score">8.7</td></tr>
+ <tr><td><b>通义千问 / 百炼</b></td><td>7.5</td><td>9.0</td><td>8.5</td><td>中</td><td class="score">8.2</td></tr>
+ <tr><td><b>ChatGPT Agent</b></td><td>9.0</td><td>8.5</td><td>9.0</td><td>低</td><td class="score">8.8</td></tr>
+ <tr><td><b>Claude</b></td><td>8.5</td><td>8.0</td><td>9.0</td><td>中</td><td class="score">8.5</td></tr>
+ <tr><td><b>Google Gemini</b></td><td>8.0</td><td>8.0</td><td>9.0</td><td>低</td><td class="score">8.4</td></tr>
+ <tr><td><b>Dify</b></td><td>8.0</td><td>8.5</td><td>9.5</td><td>中高</td><td class="score">8.4</td></tr>
+ </tbody></table>
+ <h3>测评观察</h3>
+ <ul>
+  <li><b>任务执行型产品：</b>Manus与ChatGPT Agent的产品设计更强调从目标到结果的连续执行，但复杂任务仍可能出现误操作、信息遗漏或需要人工确认的情况。</li>
+  <li><b>智能体搭建平台：</b>扣子和Dify的优势在于可配置、可复用。它们更适合把固定任务做成流程，而不是只依赖一次性对话。</li>
+  <li><b>模型与知识工作：</b>Kimi、Claude和Gemini适合信息理解、长文档处理或多模态任务，但实际Agent表现还取决于工具权限、工作流和所接入模型版本。</li>
+ </ul>
+</section>
+
+<section class="section">
+ <h2>04｜成长性分析</h2>
+ <table>
+ <thead><tr><th>产品 / 生态</th><th>成长性判断</th><th>主要增长动力</th><th>潜在限制</th></tr></thead>
+ <tbody>
+ <tr><td><b>扣子 Coze</b></td><td><span class="good">高</span></td><td>低代码搭建、插件与工作流生态，适合快速扩展垂直场景。</td><td>复杂任务的稳定性、平台依赖和工作流维护成本。</td></tr>
+ <tr><td><b>Kimi</b></td><td><span class="good">高</span></td><td>中文市场、长文本与研究型任务需求，模型和Agent能力可协同升级。</td><td>高复杂度任务的自主执行、工具覆盖和商业化成本。</td></tr>
+ <tr><td><b>Manus</b></td><td><span class="good">高</span></td><td>用户对“交付结果而非回答”的需求增加，任务执行型Agent有较大想象空间。</td><td>算力与推理成本、任务成功率、执行过程可控性。</td></tr>
+ <tr><td><b>通义千问 / 百炼</b></td><td><span class="good">高</span></td><td>模型、云服务和企业应用协同，便于进入真实业务流程。</td><td>部署和集成需要技术能力，企业落地周期较长。</td></tr>
+ <tr><td><b>ChatGPT Agent</b></td><td><span class="good">高</span></td><td>模型能力、工具生态和产品入口协同，具备跨任务扩展潜力。</td><td>地区可用性、订阅成本、隐私和操作授权管理。</td></tr>
+ <tr><td><b>Claude</b></td><td><span class="good">高</span></td><td>代码与知识工作场景深入，开发者生态和工具调用持续扩展。</td><td>付费使用成本、地区限制和部分任务仍需人工复核。</td></tr>
+ <tr><td><b>Google Gemini</b></td><td><span class="good">高</span></td><td>多模态能力与Google应用生态结合，拥有丰富的潜在应用入口。</td><td>不同地区和套餐的功能开放可能不同，生态体验存在依赖。</td></tr>
+ <tr><td><b>Dify</b></td><td><span class="good">高</span></td><td>开源与模型无关的接入方式，适合私有化部署和企业定制。</td><td>需要自行承担部署、运维、安全和模型调用费用。</td></tr>
+ </tbody></table>
+ <div class="callout"><b>趋势判断：</b>智能体的竞争将从“模型回答得多好”转向“能否稳定完成真实任务”。未来更有成长性的产品，通常同时具备可靠模型、工具生态、记忆与上下文管理、权限控制和可观测能力。</div>
+</section>
+
+<section class="section">
+ <h2>05｜性价比分析</h2>
+ <p class="lead">性价比不仅是订阅价格低，还要考虑免费额度、任务成功率、节省时间、部署维护和学习成本。</p>
+ <table>
+ <thead><tr><th>产品</th><th>成本结构（概括）</th><th>成本优势</th><th>成本风险</th><th>适合的预算策略</th></tr></thead>
+ <tbody>
+ <tr><td><b>扣子 Coze</b></td><td>平台免费能力与增值 / 用量规则并存，具体依功能而定。</td><td>可视化搭建降低开发和试错成本。</td><td>高级能力、调用量或发布场景可能产生额外成本。</td><td>先用免费能力做小型工作流，再按调用量评估升级。</td></tr>
+ <tr><td><b>Kimi</b></td><td>免费使用与会员 / API等不同路径并存。</td><td>中文资料处理方便，个人学习成本低。</td><td>高频或高阶模型使用可能需要付费。</td><td>日常资料整理先用免费额度，重度使用再比较套餐。</td></tr>
+ <tr><td><b>Manus</b></td><td>通常采用额度 / 积分或订阅等模式，需查看当前账户页面。</td><td>若能一次完成多步骤任务，可能节省大量人工时间。</td><td>复杂任务消耗额度较多，失败重试也会增加成本。</td><td>用于高价值、可验收的任务，不建议无目标地反复运行。</td></tr>
+ <tr><td><b>通义千问 / 百炼</b></td><td>模型服务、API调用与云平台资源可能分别计费。</td><td>可按调用量和业务规模灵活配置。</td><td>部署、开发、云资源和运维会形成综合成本。</td><td>先用试用额度验证效果，再按实际Token和资源用量预算。</td></tr>
+ <tr><td><b>ChatGPT Agent</b></td><td>受套餐、地区和功能开放情况影响。</td><td>通用能力覆盖面较广，减少切换多个工具的成本。</td><td>高阶功能通常受订阅档位或使用额度限制。</td><td>先确认所在地区可用性，再按每月实际任务量判断订阅价值。</td></tr>
+ <tr><td><b>Claude</b></td><td>免费 / 订阅与API按量使用等方式，按产品入口区分。</td><td>代码和长文档任务质量较好时，能降低返工成本。</td><td>长上下文和高频调用可能提高费用。</td><td>开发和专业写作场景优先试用，控制上下文和调用频率。</td></tr>
+ <tr><td><b>Google Gemini</b></td><td>免费入口、订阅方案及API计费并存。</td><td>若已使用Google生态，整合协作可能减少额外工具成本。</td><td>不同地区、套餐的额度与功能存在差异。</td><td>先用免费层测试多模态和办公场景，再决定是否订阅。</td></tr>
+ <tr><td><b>Dify</b></td><td>软件可开源自部署；模型API、服务器和运维另计。</td><td>可控性高，适合长期复用和私有化需求。</td><td>技术维护、部署和安全配置需要人力投入。</td><td>有技术能力或长期项目时更划算；短期轻量使用未必最低成本。</td></tr>
+ </tbody></table>
+ <h3>性价比结论（按使用人群）</h3>
+ <div class="cards">
+  <div class="card"><h3>学生 / 个人入门</h3><div class="kind">优先考虑：Kimi、扣子</div><p>中文体验友好，入门门槛相对较低。可先用免费功能完成资料总结、学习辅助和简单自动化。</p><div class="scores"><span>低门槛</span><span>中文友好</span><span>适合练习</span></div></div>
+  <div class="card"><h3>调研 / 复杂任务</h3><div class="kind">优先考虑：Manus、ChatGPT Agent</div><p>适合需要搜集信息、拆分步骤并产出成品的任务。应重点检查来源可靠性和最终结果。</p><div class="scores"><span>任务执行</span><span>节省时间</span><span>注意额度</span></div></div>
+  <div class="card"><h3>开发 / 企业落地</h3><div class="kind">优先考虑：Dify、百炼、扣子</div><p>适合搭建可重复使用的业务流程。评估时应把开发、部署、模型调用和运维成本一起计算。</p><div class="scores"><span>可定制</span><span>可扩展</span><span>适合长期项目</span></div></div>
+ </div>
+</section>
+
+<section class="section">
+ <h2>06｜综合评分与推荐</h2>
+ <p class="note">综合分按“任务能力40% + 成长性30% + 性价比30%”计算。成长性和性价比为研究判断分，不是官方指标。</p>
+ <table>
+ <thead><tr><th>产品</th><th>任务能力</th><th>成长性</th><th>性价比</th><th>加权综合分</th><th>推荐定位</th></tr></thead>
+ <tbody>
+ <tr><td>扣子 Coze</td><td>8.3</td><td>8.8</td><td>9.0</td><td class="score">8.66</td><td>低代码搭建入门</td></tr>
+ <tr><td>Kimi</td><td>8.2</td><td>8.7</td><td>9.0</td><td class="score">8.59</td><td>中文学习与资料分析</td></tr>
+ <tr><td>Manus</td><td>8.7</td><td>9.0</td><td>7.5</td><td class="score">8.43</td><td>复杂任务执行</td></tr>
+ <tr><td>通义千问 / 百炼</td><td>8.2</td><td>9.0</td><td>8.5</td><td class="score">8.53</td><td>企业开发与应用集成</td></tr>
+ <tr><td>ChatGPT Agent</td><td>8.8</td><td>9.2</td><td>7.5</td><td class="score">8.53</td><td>通用任务与办公</td></tr>
+ <tr><td>Claude</td><td>8.5</td><td>9.0</td><td>7.5</td><td class="score">8.35</td><td>编程与专业知识工作</td></tr>
+ <tr><td>Google Gemini</td><td>8.4</td><td>9.0</td><td>8.0</td><td class="score">8.46</td><td>多模态与生态协作</td></tr>
+ <tr><td>Dify</td><td>8.4</td><td>9.2</td><td>8.5</td><td class="score">8.67</td><td>开源定制与私有部署</td></tr>
+ </tbody></table>
+ <p class="note">综合分仅用于本报告设定的权重模型，不应理解为产品真实能力的绝对排名。对于开发者，Dify的权重可能更高；对于只想直接完成任务的用户，Manus或ChatGPT Agent可能更合适。</p>
+</section>
+
+<section class="section">
+ <h2>07｜结论与建议</h2>
+ <ol>
+  <li><b>国内智能体的优势：</b>中文交互、本土应用场景、较低的入门门槛，以及与国内办公和云服务生态的结合。扣子、Kimi、通义等产品适合学习、内容处理和业务应用探索。</li>
+  <li><b>海外智能体的优势：</b>部分产品在通用推理、复杂任务执行、开发者工具和全球生态整合方面具有竞争力。ChatGPT Agent、Claude和Gemini各有侧重。</li>
+  <li><b>成长性判断：</b>未来更值得关注的不是单纯聊天能力，而是智能体能否可靠地使用工具、跨应用协作、长期记忆、处理异常并在权限范围内完成任务。</li>
+  <li><b>性价比判断：</b>个人用户应优先考虑免费额度和上手成本；开发者应计算API、服务器与维护成本；企业则应关注数据安全、权限管理、稳定性和可审计性。</li>
+ </ol>
+ <div class="callout"><b>最终建议：</b>如果是课程作业或个人体验，建议用Kimi完成信息整理，用扣子搭建一个可展示的工作流，再选Manus或ChatGPT Agent完成同一项复杂任务进行对照。这样比只比较宣传参数更有说服力。</div>
+</section>
+
+<section class="section">
+ <h2>08｜参考资料与测评说明</h2>
+ <ul>
+  <li>Stanford HAI, <a href="https://hai.stanford.edu/ai-index/2026-ai-index-report" target="_blank" rel="noopener">AI Index Report 2026</a>：人工智能发展与智能体能力评测背景。</li>
+  <li><a href="https://os-world.github.io/" target="_blank" rel="noopener">OSWorld 官方项目</a>：真实桌面环境中的多模态智能体任务评测。</li>
+  <li><a href="https://webarena.dev/" target="_blank" rel="noopener">WebArena</a>：网页环境下的多步骤任务完成评测。</li>
+  <li><a href="https://www.agentsanalysis.com/" target="_blank" rel="noopener">Agents Analysis</a>：智能体评测基准与排行榜信息汇总。</li>
+  <li><a href="https://www.coze.com/" target="_blank" rel="noopener">Coze</a>、<a href="https://www.kimi.com/" target="_blank" rel="noopener">Kimi</a>、<a href="https://manus.im/" target="_blank" rel="noopener">Manus</a>、<a href="https://www.dify.ai/" target="_blank" rel="noopener">Dify</a>：产品定位与功能信息。</li>
+  <li><a href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a>、<a href="https://claude.ai/" target="_blank" rel="noopener">Claude</a>、<a href="https://gemini.google.com/" target="_blank" rel="noopener">Gemini</a>、<a href="https://www.aliyun.com/product/bailian" target="_blank" rel="noopener">阿里云百炼</a>：官方产品入口。</li>
+ </ul>
+ <p class="note">价格、免费额度、地区开放范围和功能权限会随产品更新而变化。本报告不填写未经官方页面逐项核验的固定价格，正式提交前建议以各产品官网当前套餐页为准。公开榜单之间的任务集、环境、模型版本和评分口径不同，不能直接混用分数。</p>
+</section>
+</main>
+<footer>课程调研报告 · 国内外AI智能体测评 · 资料整理日期：2026年11月</footer>
+</body></html>

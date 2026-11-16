@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>疲劳与性别对着陆生物力学峰值时膝屈角的影响 · 可视化分析</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#f2f3f5; --card:#ffffff; --ink:#1f2430; --sub:#5b6373; --line:#e3e6ec;
+    --accent:#3a6ea5; --accent2:#c0504d; --risk:#fdeceb; --ok:#2f7d5b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;line-height:1.7;padding:28px 16px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:24px;font-weight:700;letter-spacing:.5px}
+  .meta{color:var(--sub);font-size:13px;margin-top:6px}
+  .keybox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:26px}
+  .keybox h2{font-size:15px;color:var(--accent);margin-bottom:10px}
+  .keybox li{font-size:14px;margin-left:20px;margin-bottom:6px}
+  .keybox b{color:var(--accent2)}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:26px}
+  section.card h2{font-size:17px;margin-bottom:4px}
+  .q{color:var(--sub);font-size:13px;margin-bottom:12px}
+  .chart{width:100%}
+  .note{font-size:12px;color:var(--sub);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+  table.stats{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.stats th,table.stats td{border:1px solid var(--line);padding:8px 12px;text-align:center}
+  table.stats th{background:#f7f8fa}
+  .sig{color:var(--accent2);font-weight:700}
+  .ns{color:var(--sub)}
+  footer{color:var(--sub);font-size:12px;text-align:center;padding:10px 0 20px}
+  .export-bar{position:sticky;top:0;z-index:99;background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .export-bar span{font-size:13px;color:var(--sub)}
+  .export-bar button{border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:6px;
+    padding:6px 14px;font-size:13px;cursor:pointer}
+  .export-bar button:hover{background:var(--accent);color:#fff}
+  .export-bar button.primary{background:var(--accent);color:#fff}
+  .export-bar button.primary:hover{background:#2d5a88}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>疲劳与性别对双侧着陆峰值生物力学变量出现时膝屈角的影响</h1>
+  <div class="meta">原文：NAJSPT 2009（najspt-04-083）· 2（性别）× 2（疲劳）重复测量设计 · 40 cm 平台双侧落地 · 可视化整理</div>
+</header>
+
+<div class="export-bar">
+  <span>导出高清 PNG（3倍像素）：</span>
+  <button class="primary" onclick="exportAll()">一键导出全部</button>
+  <button onclick="exportChart(0)">图1 着陆周期</button>
+  <button onclick="exportChart(1)">图2 VGRF交互</button>
+  <button onclick="exportChart(2)">图3 腘绳肌交互</button>
+  <button onclick="exportChart(3)">图4 风险区总览</button>
+</div>
+
+<div class="keybox">
+  <h2>核心结论</h2>
+  <ul>
+    <li>所有生物力学变量（VGRF、膝外翻、股直肌/股内侧肌/内外侧腘绳肌 NEMG）的峰值均出现在膝屈角 <b>&gt; 40°</b> 的着陆中后期——即均不在 ACL 损伤风险最高的着陆初期（&lt;40°）。</li>
+    <li>性别与疲劳的单独主效应均不显著，但 <b>性别 × 疲劳交互作用显著</b>（MANOVA F(7,20)=4.8, p&lt;0.05）。</li>
+    <li>显著交互来自两个变量：① VGRF 峰值时膝屈角——疲劳后女性下降 5.6°（更接近 40° 风险区），男性微升 0.8°；② 外侧腘绳肌 NEMG 峰值时膝屈角——男性疲劳后增加 11.5°，女性下降 2.8°（p=0.003）。</li>
+    <li>方法学启示：仅分析整个着陆周期的"峰值"可能不足以刻画 ACL 损伤风险，峰值出现时的膝屈角才是关键维度。</li>
+  </ul>
+</div>
+
+<!-- 图1：四组着陆周期峰值点 -->
+<section class="card">
+  <h2>图 1 · 着陆周期中各变量峰值出现位置（四组对照）</h2>
+  <div class="q">问题：峰值出现在着陆周期的什么阶段？——横轴为着陆周期百分比，纵轴为膝屈角；红色虚线为 40° ACL 风险阈值。</div>
+  <div id="chart1" class="chart" style="height:560px"></div>
+  <div class="note">读图：所有组中 VGRF（深蓝）最早出现、膝屈角最小（约 45–53°），但仍高于 40°；膝外翻（灰）最晚出现（>80°）。四组模式高度一致，即性别与疲劳单独不改变"峰值出现阶段"。背景曲线为示意性膝屈角-着陆周期曲线。数据为自原图 2–5 读取的近似值。</div>
+</section>
+
+<!-- 图2：VGRF 交互作用 -->
+<section class="card">
+  <h2>图 2 · VGRF 峰值出现时的膝屈角：性别 × 疲劳交互（p&lt;0.05）</h2>
+  <div class="q">问题：疲劳如何改变 VGRF 峰值出现时的膝屈角？误差棒 = ±1 SD。</div>
+  <div id="chart2" class="chart" style="height:400px"></div>
+  <div class="note">交叉形态显示显著交互：女性疲劳后从 52.7° 降至 47.1°（−5.6°，更接近 40° 风险阈值，潜在临床意义）；男性从 48.8° 微升至 49.6°（+0.8°）。该变量被认为最具临床相关性，因为 VGRF 峰值出现时的膝屈角最接近 ACL 高风险区间。</div>
+</section>
+
+<!-- 图3：外侧腘绳肌 交互作用 -->
+<section class="card">
+  <h2>图 3 · 外侧腘绳肌 NEMG 峰值出现时的膝屈角：性别 × 疲劳交互（p=0.003）</h2>
+  <div class="q">问题：疲劳如何改变外侧腘绳肌峰值激活时的膝屈角？误差棒 = ±1 SD。</div>
+  <div id="chart3" class="chart" style="height:400px"></div>
+  <div class="note">男性疲劳后增加 11.5°（62.2°→73.7°），女性下降 2.8°（77.8°→75.0°）。但峰值出现在膝屈 >60° 的着陆后期，作者认为其 ACL 临床相关性有限，可能与抵抗额状面/旋转力有关。</div>
+</section>
+
+<!-- 图4：六变量峰值膝屈角总览 -->
+<section class="card">
+  <h2>图 4 · 六个生物力学变量峰值出现时的膝屈角总览</h2>
+  <div class="q">问题：各变量峰值与 40° 风险阈值的相对位置？（四组近似均值）</div>
+  <div id="chart4" class="chart" style="height:380px"></div>
+  <div class="note">红色阴影区（&lt;40°）为 ACL 损伤风险最高的着陆初期。全部 6 个变量的峰值均落在该区间之外：VGRF 最接近风险区（≈49°），膝外翻峰值最远（≈86°）。数据为图 2–5 读数的四组近似均值，仅供整体定位参考。</div>
+</section>
+
+<!-- 统计表 -->
+<section class="card">
+  <h2>附表 · MANOVA 与随访 ANOVA 结果</h2>
+  <table class="stats">
+    <tr><th>效应</th><th>df</th><th>F</th><th>p</th><th>判定</th></tr>
+    <tr><td>性别主效应</td><td>7, 21</td><td>2.44</td><td>0.053</td><td class="ns">不显著</td></tr>
+    <tr><td>疲劳主效应</td><td>7, 21</td><td>1.91</td><td>0.119</td><td class="ns">不显著</td></tr>
+    <tr><td>性别 × 疲劳 交互</td><td>7, 20</td><td>4.80</td><td>&lt;0.05</td><td class="sig">显著</td></tr>
+  </table>
+  <table class="stats" style="margin-top:14px">
+    <tr><th>随访单变量 ANOVA（交互显著变量）</th><th>男：疲劳前→后</th><th>女：疲劳前→后</th><th>变化方向</th><th>p</th></tr>
+    <tr><td>VGRF 峰值时膝屈角</td><td>48.8°±13 → 49.6°±15</td><td>52.7°±11 → 47.1°±11</td><td>男 +0.8° / 女 −5.6°</td><td class="sig">&lt;0.05</td></tr>
+    <tr><td>外侧腘绳肌 NEMG 峰值时膝屈角</td><td>62.2°±19 → 73.7°±21</td><td>77.8°±16 → 75.0°±15</td><td>男 +11.5° / 女 −2.8°</td><td class="sig">0.003</td></tr>
+  </table>
+  <div class="note">研究流程：3 次疲劳前着陆（40 cm 平台，双臂交叉抱胸）→ 疲劳方案（100 次跨障碍跳 + ≤50 次垂直跳）→ 6 分钟内完成 3 次疲劳后着陆。运动学 6 Hz 四阶低通滤波；EMG 10–500 Hz 六阶带通；NEMG 归一化至 20 cm 着陆最大线性包络；VGRF 归一化至体重。</div>
+</section>
+
+<footer>数据来源：NAJSPT 2009;4:83（图 2–7 及正文）。图 1/图 4 数值为原图近似读数，图 2/图 3 及附表为正文精确值。本页面仅作数据可视化整理，不构成临床建议。</footer>
+</div>
+
+<script>
+var INK='#1f2430', SUB='#5b6373', LINE='#e3e6ec', RISK='#c0504d';
+var variables=['VGRF','股直肌','股内侧肌','内侧腘绳肌','外侧腘绳肌','膝外翻'];
+var colors=['#3a6ea5','#e08a3c','#5aa06f','#8e6bbf','#c0504d','#7a7f8c'];
+
+/* ---------- 图1：四联着陆周期 ---------- */
+var curve=[[0,19],[10,33],[20,45],[25,49],[30,56],[35,62],[40,66],[45,72],[50,77],[55,81],[60,84],[65,86],[70,88],[80,91],[90,92],[100,93]];
+var groups=[
+  {name:'非疲劳男性', data:{VGRF:[22,49],'股直肌':[30,59],'股内侧肌':[36,66],'内侧腘绳肌':[33,63],'外侧腘绳肌':[45,72],'膝外翻':[72,86]}},
+  {name:'疲劳男性',   data:{VGRF:[24,50],'股直肌':[33,60],'股内侧肌':[40,66],'内侧腘绳肌':[36,63],'外侧腘绳肌':[47,75],'膝外翻':[62,82]}},
+  {name:'非疲劳女性', data:{VGRF:[26,53],'股直肌':[36,65],'股内侧肌':[38,66],'内侧腘绳肌':[33,59],'外侧腘绳肌':[50,80],'膝外翻':[73,88]}},
+  {name:'疲劳女性',   data:{VGRF:[23,45],'股直肌':[30,60],'股内侧肌':[34,65],'内侧腘绳肌':[32,62],'外侧腘绳肌':[44,76],'膝外翻':[65,86]}}
+];
+var grids=[], xAxes=[], yAxes=[], series1=[];
+var gridPos=[{left:'8%',top:'14%',width:'38%',height:'28%'},{left:'57%',top:'14%',width:'38%',height:'28%'},
+             {left:'8%',top:'58%',width:'38%',height:'28%'},{left:'57%',top:'58%',width:'38%',height:'28%'}];
+groups.forEach(function(g,gi){
+  grids.push(Object.assign({containLabel:true},gridPos[gi]));
+  xAxes.push({type:'value',min:0,max:100,gridIndex:gi,name: gi>1?'着陆周期 %':'',nameLocation:'middle',nameGap:26,
+    axisLabel:{color:SUB,fontSize:11},splitLine:{lineStyle:{color:LINE}}});
+  yAxes.push({type:'value',min:0,max:100,gridIndex:gi,name: gi%2===0?'膝屈角 (°)':'',nameTextStyle:{color:SUB},
+    axisLabel:{color:SUB,fontSize:11},splitLine:{lineStyle:{color:LINE}}});
+  series1.push({type:'line',data:curve,xAxisIndex:gi,yAxisIndex:gi,showSymbol:false,smooth:true,
+    lineStyle:{color:'#c9ced8',width:1.5},silent:true,z:1});
+  variables.forEach(function(v,vi){
+    series1.push({name:v,type:'scatter',data:[g.data[v]],xAxisIndex:gi,yAxisIndex:gi,
+      symbolSize:10,itemStyle:{color:colors[vi],borderColor:'#fff',borderWidth:1},z:3,
+      legendHoverLink:true});
+  });
+  series1.push({type:'line',data:[],xAxisIndex:gi,yAxisIndex:gi,
+    markLine:{silent:true,symbol:'none',label:{formatter:'40° 风险阈值',color:RISK,fontSize:10,position:'insideEndTop'},
+      lineStyle:{color:RISK,type:'dashed',width:1},data:[{yAxis:40}]}});
+  series1.push({type:'scatter',data:[],xAxisIndex:gi,yAxisIndex:gi,
+    markArea:{silent:true,itemStyle:{color:'rgba(192,80,77,0.06)'},data:[[{yAxis:0},{yAxis:40}]]}});
+  series1.push({type:'scatter',data:[[50,95]],xAxisIndex:gi,yAxisIndex:gi,symbolSize:0,silent:true,
+    label:{show:true,formatter:g.name,fontSize:13,fontWeight:'bold',color:INK},tooltip:{show:false}});
+});
+var chart1=echarts.init(document.getElementById('chart1'));
+chart1.setOption({
+  animation:false,
+  legend:{data:variables,bottom:0,itemWidth:12,itemHeight:8,textStyle:{fontSize:12,color:SUB}},
+  grid:grids, xAxis:xAxes, yAxis:yAxes, series:series1,
+  tooltip:{trigger:'item',formatter:function(p){return p.seriesName==null?'':groups[Math.floor(p.seriesIndex/(variables.length+3))]&&p.seriesType==='scatter'&&p.value? p.seriesName+'：周期 '+p.value[0]+'%，膝屈角 '+p.value[1]+'°':'';}}
+});
+
+/* ---------- 交互作用图（图2、图3） ---------- */
+function errorBar(data){
+  return {type:'custom',silent:true,z:5,
+    renderItem:function(params,api){
+      var c=api.coord([api.value(0),api.value(1)]);
+      var lo=api.coord([api.value(0),api.value(1)-api.value(2)]);
+      var hi=api.coord([api.value(0),api.value(1)+api.value(2)]);
+      var hw=9, st={stroke:api.value(3),fill:api.value(3),lineWidth:1.4};
+      return {type:'group',children:[
+        {type:'line',shape:{x1:c[0],y1:lo[1],x2:c[0],y2:hi[1]},style:st},
+        {type:'line',shape:{x1:c[0]-hw,y1:lo[1],x2:c[0]+hw,y2:lo[1]},style:st},
+        {type:'line',shape:{x1:c[0]-hw,y1:hi[1],x2:c[0]+hw,y2:hi[1]},style:st}
+      ]};
+    },data:data};
+}
+function interactionChart(elId, male, female, ymin, ymax){
+  var cMale='#3a6ea5', cFemale='#c0504d';
+  var ch=echarts.init(document.getElementById(elId));
+  ch.setOption({
+    grid:{left:70,right:40,top:46,bottom:44},
+    legend:{data:['男性','女性'],top:6,textStyle:{color:SUB}},
+    xAxis:{type:'category',data:['疲劳前','疲劳后'],axisLabel:{color:INK,fontSize:13},
+      axisLine:{lineStyle:{color:'#aab'}},axisTick:{show:false}},
+    yAxis:{type:'value',min:ymin,max:ymax,name:'膝屈角 (°)',nameTextStyle:{color:SUB},
+      axisLabel:{color:SUB},splitLine:{lineStyle:{color:LINE}}},
+    series:[
+      {name:'男性',type:'line',data:[male[0],male[1]],symbolSize:10,
+        itemStyle:{color:cMale},lineStyle:{color:cMale,width:2.5},
+        label:{show:true,formatter:function(p){return p.value.toFixed(1)+'°'},position:'top',color:cMale,fontSize:12}},
+      {name:'女性',type:'line',data:[female[0],female[1]],symbolSize:10,
+        itemStyle:{color:cFemale},lineStyle:{color:cFemale,width:2.5},
+        label:{show:true,formatter:function(p){return p.value.toFixed(1)+'°'},position:'bottom',color:cFemale,fontSize:12}},
+      errorBar([[0,male[0],male[2],cMale],[1,male[1],male[3],cMale]]),
+      errorBar([[0,female[0],female[2],cFemale],[1,female[1],female[3],cFemale]]),
+      {type:'line',data:[],markLine:{silent:true,symbol:'none',
+        label:{formatter:'40° ACL 风险阈值',color:RISK,fontSize:10,position:'insideEndTop'},
+        lineStyle:{color:RISK,type:'dashed'},data:[{yAxis:40}]}}
+    ],
+    tooltip:{trigger:'axis'}
+  });
+  return ch;
+}
+var ch2=interactionChart('chart2',[48.8,49.6,13,15],[52.7,47.1,11,11],30,65);
+var ch3=interactionChart('chart3',[62.2,73.7,19,21],[77.8,75.0,16,15],40,100);
+
+/* ---------- 图4：六变量总览 ---------- */
+var overview=[
+  {name:'VGRF',val:49.3},
+  {name:'股直肌 NEMG',val:61.0},
+  {name:'内侧腘绳肌 NEMG',val:61.8},
+  {name:'股内侧肌 NEMG',val:65.8},
+  {name:'外侧腘绳肌 NEMG',val:75.8},
+  {name:'膝外翻',val:85.5}
+];
+var ch4=echarts.init(document.getElementById('chart4'));
+ch4.setOption({
+  grid:{left:130,right:70,top:30,bottom:40},
+  xAxis:{type:'value',min:0,max:100,name:'峰值出现时的膝屈角 (°)',nameLocation:'middle',nameGap:28,
+    axisLabel:{color:SUB},splitLine:{lineStyle:{color:LINE}}},
+  yAxis:{type:'category',data:overview.map(function(d){return d.name}),inverse:true,
+    axisLabel:{color:INK,fontSize:13},axisTick:{show:false},axisLine:{show:false}},
+  series:[
+    {type:'bar',data:overview.map(function(d,i){return {value:d.val,itemStyle:{color:colors[i],borderRadius:[0,4,4,0]}}}),
+      barWidth:20,label:{show:true,position:'right',formatter:'≈{c}°',color:SUB,fontSize:12},
+      markArea:{silent:true,itemStyle:{color:'rgba(192,80,77,0.10)'},
+        label:{show:true,position:'insideTop',color:RISK,fontSize:11,formatter:'ACL 高风险区（<40°，着陆初期）'},
+        data:[[{xAxis:0},{xAxis:40}]]},
+      markLine:{silent:true,symbol:'none',lineStyle:{color:RISK,type:'dashed'},
+        label:{show:false},data:[{xAxis:40}]}}
+  ],
+  tooltip:{trigger:'item',formatter:function(p){return p.name+'：≈'+p.value+'°';}}
+});
+
+window.addEventListener('resize',function(){[chart1,ch2,ch3,ch4].forEach(function(c){c.resize()});});
+
+/* ---------- 高清 PNG 导出（3倍像素） ---------- */
+var chartList=[
+  {inst:chart1,name:'图1_着陆周期峰值点_四组对照'},
+  {inst:ch2,name:'图2_VGRF峰值膝屈角_性别x疲劳交互'},
+  {inst:ch3,name:'图3_外侧腘绳肌NEMG峰值膝屈角_交互'},
+  {inst:ch4,name:'图4_六变量峰值膝屈角_风险区总览'}
+];
+function exportChart(i){
+  var url=chartList[i].inst.getDataURL({type:'png',pixelRatio:3,backgroundColor:'#fff'});
+  var a=document.createElement('a');
+  a.href=url;a.download=chartList[i].name+'.png';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function exportAll(){
+  chartList.forEach(function(c,i){setTimeout(function(){exportChart(i)},i*600)});
+}
+if(location.hash.indexOf('export')>-1){setTimeout(exportAll,1200);}
+</script>
+</body>
+</html>

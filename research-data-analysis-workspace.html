@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>科研数据助手 · 原文 vs 解读</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --bg-warm: #efeeea;
+    --ink: #1a1a1a;
+    --ink-2: #3d3d3a;
+    --ink-3: #6b6b68;
+    --ink-4: #9a9a96;
+    --rule: #d8d8d4;
+    --rule-soft: #e8e8e4;
+    --accent: #2c2c2a;
+    --accent-warm: #b5733a;
+    --accent-blue: #3a6db5;
+    --code-bg: #f0efeb;
+    --md-bg: #1e1e1e;
+    --md-text: #d4d4d4;
+    --md-h: #569cd6;
+    --md-code: #ce9178;
+    --md-key: #9cdcfe;
+    --md-str: #ce9178;
+    --md-bool: #569cd6;
+    --md-comment: #6a9955;
+    --md-border: #3d3d3d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    height: 100vh; overflow: hidden;
+  }
+
+  /* ========== 顶栏 ========== */
+  .topbar {
+    height: 56px; flex-shrink: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px;
+    font-family: "Source Han Sans SC", sans-serif;
+    background: var(--bg);
+  }
+  .tb-left {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .tb-logo {
+    font-size: 11px; letter-spacing: 0.2em; font-weight: 700;
+    color: var(--ink); text-transform: uppercase;
+  }
+  .tb-logo sub {
+    font-size: 9px; letter-spacing: 0.1em; font-weight: 400;
+    color: var(--ink-4); text-transform: none;
+    margin-left: 6px;
+  }
+  .tb-tabs {
+    display: flex; gap: 0; border: 1px solid var(--rule);
+    border-radius: 4px; overflow: hidden; margin-left: 24px;
+  }
+  .tb-tab {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    padding: 8px 20px; cursor: default;
+    color: var(--ink-3);
+    background: var(--bg);
+    transition: all 0.2s ease;
+  }
+  .tb-tab.active {
+    background: var(--ink); color: #fff;
+  }
+
+  /* ========== 主体布局 ========== */
+  .app {
+    display: flex; flex-direction: column;
+    height: 100vh;
+  }
+  .split {
+    flex: 1; display: flex; overflow: hidden;
+  }
+
+  /* ========== 左栏: Markdown 原文 ========== */
+  .pane {
+    flex: 1; display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .pane-header {
+    height: 40px; flex-shrink: 0;
+    background: var(--md-bg);
+    color: #888;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 12px;
+    border-bottom: 1px solid var(--md-border);
+  }
+  .pane-header.right-header {
+    background: var(--bg); color: var(--ink-4);
+    border-bottom-color: var(--rule);
+    font-family: "Source Han Sans SC", sans-serif;
+  }
+  .ph-title { display: flex; align-items: center; gap: 10px; }
+  .ph-dots { display: flex; gap: 6px; }
+  .ph-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .ph-dots span:nth-child(1) { background: #ff5f57; }
+  .ph-dots span:nth-child(2) { background: #febc2e; }
+  .ph-dots span:nth-child(3) { background: #28c840; }
+
+  .md-content {
+    flex: 1; overflow-y: auto;
+    background: var(--md-bg);
+    color: var(--md-text);
+    font-family: "JetBrains Mono", "Fira Code", Consolas, "SF Mono", monospace;
+    font-size: 13.5px; line-height: 1.75;
+    padding: 32px 36px 64px;
+  }
+  .md-content::-webkit-scrollbar { width: 8px; }
+  .md-content::-webkit-scrollbar-track { background: transparent; }
+  .md-content::-webkit-scrollbar-thumb { background: #3d3d3d; border-radius: 4px; }
+
+  /* 真实源码块 */
+  .raw-source {
+    font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    font-size: 12.5px; line-height: 1.7;
+    color: var(--md-text);
+    background: var(--md-bg);
+    padding: 20px 0;
+    margin: 0; border: none;
+    overflow-x: auto;
+  }
+  .raw-source code { display: block; }
+  .src-line {
+    display: block;
+    padding-left: 60px;
+    position: relative;
+    white-space: pre;
+  }
+  .src-line::before {
+    content: attr(data-line);
+    position: absolute;
+    left: 0; top: 0;
+    width: 44px;
+    text-align: right;
+    padding-right: 12px;
+    color: #4a4a4a;
+    font-size: 11px;
+    user-select: none;
+    border-right: 1px solid #2a2a2a;
+    margin-right: 16px;
+  }
+  .src-line.hl { background: rgba(86,156,214,0.08); }
+  .src-line.hl::before { color: #6ab0f3; }
+
+  .md-frontmatter {
+    border-left: 1px solid var(--md-comment);
+    padding-left: 16px; margin-bottom: 28px;
+    font-size: 12.5px;
+    color: #b0b0b0;
+  }
+  .md-frontmatter .fm-key { color: var(--md-key); }
+  .md-frontmatter .fm-str { color: var(--md-str); }
+
+  .md-h1 {
+    font-size: 20px; font-weight: 700;
+    color: var(--md-h);
+    margin: 36px 0 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--md-border);
+    line-height: 1.4;
+  }
+  .md-h2 {
+    font-size: 16px; font-weight: 700;
+    color: var(--md-h);
+    margin: 32px 0 16px;
+    padding-left: 12px;
+    border-left: 3px solid var(--md-h);
+    line-height: 1.4;
+  }
+  .md-h3 {
+    font-size: 14px; font-weight: 600;
+    color: #4ec9b0;
+    margin: 24px 0 12px;
+  }
+  .md-p { margin: 12px 0; color: var(--md-text); }
+  .md-p .md-bold { color: #dcdcaa; font-weight: 700; }
+  .md-p .md-code {
+    background: rgba(206,145,120,0.15);
+    color: var(--md-code);
+    padding: 1px 6px; border-radius: 2px;
+  }
+  .md-p .md-link { color: #ce9178; text-decoration: underline; }
+  .md-ul { list-style: none; margin: 12px 0; padding-left: 20px; }
+  .md-ul li {
+    padding: 4px 0;
+    position: relative; color: var(--md-text);
+  }
+  .md-ul li::before {
+    content: '•'; position: absolute; left: -16px;
+    color: var(--md-h);
+  }
+  .md-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 12.5px; }
+  .md-table th, .md-table td {
+    text-align: left; padding: 8px 14px;
+    border-bottom: 1px solid var(--md-border);
+  }
+  .md-table th {
+    color: var(--md-h); font-weight: 600;
+    background: rgba(86,156,214,0.08);
+    border-bottom: 2px solid var(--md-h);
+  }
+  .md-table td { color: var(--md-text); }
+  .md-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .md-hr { border: none; border-top: 1px dashed var(--md-border); margin: 28px 0; }
+  .md-code-block {
+    background: #111;
+    border: 1px solid var(--md-border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 12.5px;
+    overflow-x: auto;
+  }
+  .md-code-block .cb-comment { color: var(--md-comment); }
+  .md-code-block .cb-key { color: var(--md-key); }
+  .md-code-block .cb-str { color: var(--md-str); }
+
+  /* ========== 分隔条 ========== */
+  .divider {
+    width: 4px; flex-shrink: 0;
+    background: var(--rule);
+    cursor: col-resize;
+    transition: background 0.15s ease;
+  }
+  .divider:hover { background: var(--ink-4); }
+
+  /* ========== 右栏: 解读 ========== */
+  .explain-content {
+    flex: 1; overflow-y: auto;
+    background: var(--bg);
+    font-family: "Source Han Serif SC", "Noto Serif SC", "STSong", Georgia, serif;
+    padding: 32px 48px 64px;
+  }
+  .explain-content::-webkit-scrollbar { width: 8px; }
+  .explain-content::-webkit-scrollbar-track { background: transparent; }
+  .explain-content::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
+
+  .ex-section { margin-bottom: 56px; }
+  .ex-section:last-child { margin-bottom: 0; }
+
+  .ex-label {
+    font-family: "Source Han Sans SC", sans-serif;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-4); font-weight: 600;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ex-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--rule);
+  }
+
+  .ex-h1 {
+    font-size: 30px; font-weight: 400;
+    letter-spacing: -0.01em; line-height: 1.3;
+    color: var(--ink); margin-bottom: 16px;
+  }
+  .ex-h1 em { font-style: italic; color: var(--accent-warm); }
+
+  .ex-h2 {
+    font-size: 20px; font-weight: 500;
+    color: var(--ink); margin: 28px 0 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+  }
+
+  .ex-block {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent-warm);
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+  .ex-block.positive { border-left-color: var(--ink); }
+  .ex-block.warn { border-left-color: var(--accent-warm); }
+  .ex-block.info { border-left-color: var(--accent-blue); }
+
+  .ex-block-title {
+    font-family: "Source Han Sans SC", sans-serif;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-4); font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .ex-p {
+    font-size: 15px; line-height: 1.85;
+    color: var(--ink-2); margin: 10px 0;
+  }
+  .ex-p strong { color: var(--ink); font-weight: 600; }
+  .ex-p em { font-style: italic; color: var(--accent-warm); }
+
+  .ex-quote {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 12.5px; color: var(--ink-3);
+    background: var(--bg-warm);
+    border-left: 3px solid var(--rule);
+    padding: 12px 16px; margin: 12px 0;
+    line-height: 1.7;
+  }
+  .ex-quote::before {
+    content: '// 原文';
+    display: block; font-family: "Source Han Sans SC", sans-serif;
+    font-size: 10px; letter-spacing: 0.15em;
+    color: var(--ink-4); margin-bottom: 6px;
+  }
+
+  /* 学科路由解读 */
+  .route-matrix {
+    display: grid; grid-template-columns: 120px 1fr 120px 1fr;
+    gap: 0;
+    border: 1px solid var(--rule);
+    margin: 16px 0;
+    background: #fff;
+  }
+  .route-matrix div {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13.5px; line-height: 1.6;
+  }
+  .route-matrix div:nth-child(odd) {
+    font-family: "Source Han Sans SC", sans-serif;
+    font-size: 11px; letter-spacing: 0.12em;
+    font-weight: 600; text-transform: uppercase;
+    color: var(--ink-4); background: var(--bg-warm);
+    border-right: 1px solid var(--rule);
+  }
+  .route-matrix div:nth-child(even) { color: var(--ink-2); }
+
+  /* 工作流时间线 */
+  .timeline {
+    position: relative; padding-left: 24px; margin: 16px 0;
+  }
+  .timeline::before {
+    content: ''; position: absolute; left: 7px; top: 4px; bottom: 4px;
+    width: 2px; background: var(--rule);
+  }
+  .tl-item {
+    position: relative; padding-bottom: 20px;
+  }
+  .tl-item::before {
+    content: ''; position: absolute; left: -21px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--ink);
+  }
+  .tl-item h4 {
+    font-family: "Source Han Sans SC", sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--ink); margin-bottom: 4px;
+  }
+  .tl-item p {
+    font-size: 14px; color: var(--ink-2); line-height: 1.7;
+  }
+
+  /* 边界列表 */
+  .boundary-list { list-style: none; padding: 0; margin: 16px 0; }
+  .boundary-list li {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 12px 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  .boundary-list li:last-child { border-bottom: none; }
+  .bl-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; color: var(--accent-warm);
+    flex-shrink: 0; padding-top: 3px;
+  }
+  .bl-text { font-size: 14px; color: var(--ink-2); line-height: 1.7; }
+
+  /* 视觉原则 */
+  .vision-list {
+    counter-reset: vision;
+    list-style: none; padding: 0; margin: 16px 0;
+  }
+  .vision-list li {
+    counter-increment: vision;
+    display: flex; gap: 20px;
+    padding: 16px 0; border-bottom: 1px solid var(--rule);
+  }
+  .vision-list li::before {
+    content: counter(vision, decimal-leading-zero);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.15em; color: var(--ink-4);
+    flex-shrink: 0; padding-top: 4px;
+  }
+  .vision-list li p {
+    font-size: 14.5px; color: var(--ink-2); line-height: 1.8;
+  }
+  .vision-list li p strong { color: var(--ink); }
+  .vision-list li p em { font-style: italic; color: var(--accent-warm); }
+
+  /* 导航联动 */
+  .anchor { scroll-margin-top: 20px; }
+
+  /* 响应式 */
+  @media (max-width: 900px) {
+    .split { flex-direction: column; }
+    .divider { width: 100%; height: 4px; cursor: row-resize; }
+    .md-content, .explain-content { padding: 24px; }
+    .route-matrix { grid-template-columns: 1fr; }
+    .route-matrix div { border-right: none; }
+  }
+  /* 运用章节（第三栏） */
+  #appPane{background:linear-gradient(180deg,#f6efe6 0%,#f3ece2 100%)}
+  #ex-application{
+    background:rgba(255,255,255,0.45);
+    border:1px solid #e2d5c2;border-left:4px solid var(--accent-warm);
+    border-radius:6px;padding:28px 30px 22px;margin-bottom:40px;
+  }
+  #ex-application .ex-h2{border-bottom-color:#e2d5c2}
+  #ex-application .ex-block{background:#fff}
+  .app-chart{width:100%;border:1px solid var(--rule);background:#fff;margin:12px 0 4px}
+  .app-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:14px 0;background:#fff;font-family:"Source Han Sans SC",sans-serif}
+  .app-table th,.app-table td{border-bottom:1px solid var(--rule);padding:8px 10px;text-align:center}
+  .app-table th{font-size:11px;letter-spacing:.1em;color:var(--ink-4);font-weight:700;border-bottom:2px solid var(--ink)}
+  .app-note{font-size:12px;color:var(--ink-4);line-height:1.7;margin:6px 0 10px;font-family:"Source Han Sans SC",sans-serif}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="tb-left">
+      <div class="tb-logo">research-data-analysis-workspace<sub>v0.1.1</sub></div>
+      <div class="tb-tabs">
+        <div class="tb-tab active">ORIGINAL · SKILL.md</div>
+        <div class="tb-tab">INTERPRETATION · 解读</div>
+        <div class="tb-tab">APPLICATION · 运用</div>
+      </div>
+    </div>
+    <div style="font-family:'Source Han Sans SC',sans-serif;font-size:12px;color:var(--ink-4);letter-spacing:.08em">
+      左右对照 · 原文与解读同步
+    </div>
+  </header>
+
+  <!-- 主体: 左右分栏 -->
+  <div class="split">
+
+    <!-- ============ 左栏 ============ -->
+    <div class="pane">
+      <div class="pane-header">
+        <div class="ph-title">
+          <div class="ph-dots"><span></span><span></span><span></span></div>
+          <span>SKILL.md · raw markdown</span>
+        </div>
+        <span>67 行</span>
+      </div>
+
+      <div class="md-content" id="mdPane">
+        <pre class="raw-source"><code class="language-markdown" id="mdCode"><span id="md-intro"></span>---
+<span style="color:#9cdcfe">name</span>: <span style="color:#ce9178">research-data-analysis-workspace</span>
+<span style="color:#9cdcfe">description</span>: <span style="color:#ce9178">全学科科研数据分析助手。只要用户需要处理实际研究数据、公共科研数据库数据、统计软件输出、结果图表、分析代码或可复现分析流程，就使用本 skill；适用于生命与健康、数理与自然、工程与计算、农业食品与环境、社会行为与经济管理、人文教育与法学等领域，覆盖数据识别、清洗质控、缺失/异常/重复处理、描述统计、方法选择、统计建模、组间比较、结果解释、图表和复现交付。不要用于纯知识问答、纯文献综述、论文代写或语言润色、数据伪造、按显著性筛选结果，以及不涉及研究数据或分析产物的普通任务。</span>
+---
+
+<span style="color:#569cd6;font-weight:700"># 科研数据助手</span>
+
+作为全学科科研数据分析总入口。先判断分析意图，再按学科路由；学科模块的开发深度不得影响任务正常执行，也不要向用户暴露内部模块是否已细化。
+
+<span id="md-constraints"><span style="color:#569cd6;font-weight:700">## 执行约束</span></span>
+
+- **同轮完成**：缺少定义、字典或裁定信息时，先采用不改原值、不擅自映射、不把未知当正常的保守口径，完成所有仍可可靠完成的分析和最终交付。用"已确认结果 + 条件性结果/场景 + 未决影响"表达不确定性；不得以"请确认后继续""可推进至正式分析集"结束任务，也不得只交中间文件而不交最终报告。仅当任何合理假设下都无法产生用户所需的核心结果时，才提出一个最小必要问题。
+- **依赖安装**：若 pip 安装明显缓慢，可考虑切换至当前网络环境可访问且可信的软件源。
+
+<span id="md-disciplines"><span style="color:#569cd6;font-weight:700">## 学科路由</span></span>
+
+根据研究问题、数据来源和分析单位选择一个主入口；跨学科任务组合读取，无法可靠归类时使用通用入口。不要因某学科尚未细化而退出本 skill。
+
+<span style="color:#569cd6">| 学科 | 学科方向 |</span>
+<span style="color:#569cd6">|---|---|</span>
+<span style="color:#569cd6">| 生命与健康科学 | 临床医学、公共卫生、生命科学、生物实验、生物信息、药理毒理、心理健康 |</span>
+<span style="color:#569cd6">| 数理与自然科学 | 数学、统计方法、物理、化学、材料、天文、地球与基础环境科学 |</span>
+<span style="color:#569cd6">| 工程与计算科学 | 工程实验、制造、能源、交通、建筑、计算机、软件与信息系统 |</span>
+<span style="color:#569cd6">| 农业、食品与环境科学 | 农学、林学、畜牧、水产、食品、生态与资源环境应用研究 |</span>
+<span style="color:#569cd6">| 社会、行为与经济管理 | 社会学、行为科学、经济、金融、管理、传播、公共政策 |</span>
+<span style="color:#569cd6">| 人文、教育与法学 | 人文计算、语言、历史、教育、法学、艺术与文化研究 |</span>
+<span style="color:#569cd6">| 通用与跨学科 | 跨学科、方法学或暂时无法归类 |</span>
+
+路由示例：临床心理量表进入生命与健康；普通教育心理或组织行为进入社会行为；医学影像算法同时读取生命健康与工程计算；环境暴露健康效应同时读取生命健康与农业环境。
+
+<span id="md-workflow"><span style="color:#569cd6;font-weight:700">## 通用分析思路</span></span>
+
+围绕研究问题推进，按任务复杂度裁剪，不机械执行固定步骤，也不把过程清单逐项写进报告：
+
+- 先抓住研究设计、分析单位、关键变量和数据关系，只补充会实质改变分析的问题。
+- 优先处理会影响结论的缺失、异常、重复、依赖、混杂、泄漏和测量问题，其余内容保持轻量。
+- 选择与设计和数据匹配的最小充分方法；简单任务直接完成，复杂或高风险任务再增加诊断、敏感性分析和复现记录。
+- 交付聚焦结果、不确定性、局限和可行动建议，区分观测、计算、外部证据与假设。
+
+学科模块提供领域方法，不要求为了流程完整而增加无关分析；只有已细化模块才能增加领域专用规则，不能凭常识临时伪造强制标准。
+
+<span style="color:#4ec9b0;font-weight:600">### 可选的通用表格脚本</span>
+
+用户提供 CSV、TSV 或 Excel，且结构盘点或重复转换能明显减少临时代码时，按需读取[通用表格脚本](references/tabular-scripts.md)：
+
+- `scripts/inspect_tabular_data.py` 只生成结构与变量候选，不修改数据；
+- `scripts/normalize_research_data.py` 只执行配置中明确声明的转换，并写入新的派生文件。
+
+简单任务直接处理；非表格或领域专用数据使用对应学科工具。脚本不替代变量语义判断、统计方法选择、结果解释和视觉表达，也不用于交付检查或 HTML 渲染。
+
+<span id="md-output"><span style="color:#569cd6;font-weight:700">## 产物生成</span></span>
+
+完成分析后，按用户要求的格式直接生成产物。不设置机器验收门、发布门、交付门或生成前后检查流程，也不因未运行检查器而阻断交付。模型诊断、敏感性分析和开发/验证评估属于分析本身，应在撰写产物前完成，不作为交付门禁。
+
+产物及其本地资源写出后直接交付：不再读取、解析、检查、验证、lint、渲染或运行；不调用内置 checker/validator、`node --check` 或其他检查器；不启动本地服务器，不打开浏览器，不截图，也不创建运行时预览。
+
+<span id="md-boundary"><span style="color:#569cd6;font-weight:700">## 硬边界</span></span>
+
+- 不代写论文或综述，不伪造数据，不承诺显著、发表或通过审稿。
+- 不按显著性挑选样本、变量、模型、结局、亚组或图表。
+- 不改写原始数据；修正、排除、转换与插补必须发生在派生副本并可追溯。
+- 不把统计关联自动解释为因果；不把群体研究结果直接改写为个体决策。
+- 不从字段名或当前取值擅自确定变量语义、队列定义、时间零点、阈值或排除规则；证据不足时保留为候选。
+- 主报告只呈现影响判断的结果、风险与下一步；内部审计和验证材料按需单独交付。
+- 若材料、定义、关键数据或工具不足，如实说明可完成范围和限制，继续完成仍可可靠完成的部分；不得把局部结果描述为全部结果，也不得把用户确认设置为交付门。
+
+<span id="md-vision"><span style="color:#569cd6;font-weight:700">## 视觉表达</span></span>
+
+保持已有媒介或宿主工具的技术骨架，只做内容驱动的视觉组织，不建立第二套渲染流程：
+
+- 每个页面或主要区域只突出一个核心结论、数字、图表或比较，证据和局限降一级呈现。
+- 优先使用对齐、尺度和留白建立层级；普通叙述不装卡片，避免等权 KPI 卡片、彩色边条、渐变、玻璃、阴影和无意义图标堆叠。
+- 一张图只回答一个问题，标明单位、分母、样本量/事件数、区间和必要基准；精确值保留在可见表格中。
+- 使用一套稳定的字体、间距和颜色语义；关键区别不能只靠红绿，图表直接标签优先于复杂图例。
+- 主报告先给结论与关键证据，不让审计台账、运行日志、规则矩阵、环境信息或文件清单抢占阅读层级。
+- 不为了视觉丰富增加与研究问题无关的图表、交互、章节或装饰。</code></pre>
+      </div>
+    </div>
+
+    <!-- 分隔条 -->
+    <div class="divider" id="divider"></div>
+
+    <!-- ============ 右栏 ============ -->
+    <div class="pane">
+      <div class="pane-header right-header">
+        <div class="ph-title">
+          <span>INTERPRETATION · 结构化解读</span>
+        </div>
+        <span>→</span>
+      </div>
+
+      <div class="explain-content" id="exPane">
+
+        <!-- 概述 -->
+        <div class="ex-section anchor" id="ex-intro">
+          <div class="ex-label">OVERVIEW / 定位</div>
+          <h1 class="ex-h1">把<em>研究数据</em>变成<br>可判断的结论。</h1>
+          <p class="ex-p">这是一个<strong>全学科科研数据分析的总入口</strong>。它不做通用知识问答，不做文献综述，只处理<strong>实际研究数据</strong>——从 CSV、Excel、SPSS 输出到测序数据、实验日志。</p>
+          <div class="ex-quote">先判断分析意图，再按学科路由。不要向用户暴露内部模块是否已细化。</div>
+          <p class="ex-p">后半句很关键：<strong>即使用户碰巧问到了技能还没细化的学科，也不能说"抱歉我不支持"</strong>——要继续做。只是在内部不用那些领域专用规则。这是"通用"入口存在的真正原因。</p>
+        </div>
+
+        <!-- 执行约束 -->
+        <div class="ex-section anchor" id="ex-constraints">
+          <div class="ex-label">GUARDRAILS / 执行约束</div>
+          <h2 class="ex-h2">同轮完成，保守口径</h2>
+          <p class="ex-p">核心规则只有两条，第一条最重要：<strong>绝不把任务卡成"等用户确认"</strong>。</p>
+
+          <div class="ex-block positive">
+            <div class="ex-block-title">CONFIRMED · 已确认结果</div>
+            <p class="ex-p">数据里没有歧义的部分直接出结论，例如描述统计、组间差异、模型拟合度。</p>
+          </div>
+          <div class="ex-block info">
+            <div class="ex-block-title">CONDITIONAL · 条件性结果</div>
+            <p class="ex-p">当变量语义不确定时，用"如果 X 表示 A，则 Y；如果表示 B，则 Z"的格式呈现多场景结论。</p>
+          </div>
+          <div class="ex-block warn">
+            <div class="ex-block-title">UNRESOLVED · 未决影响</div>
+            <p class="ex-p">明确标注哪些字段、定义或阈值缺失会影响结果方向，但<strong>不阻塞已可完成的部分</strong>。</p>
+          </div>
+
+          <p class="ex-p">第二条是关于<strong>依赖安装</strong>——本质是"不要在 pip install 上卡死"。网络不通就换源，超时就换源，不要让工程基础设施问题阻断分析。</p>
+        </div>
+
+        <!-- 学科路由 -->
+        <div class="ex-section anchor" id="ex-disciplines">
+          <div class="ex-label">ROUTING / 学科路由</div>
+          <h2 class="ex-h2">七大学科 + 跨学科组合</h2>
+          <p class="ex-p">路由的核心逻辑：<strong>主入口按研究设计选，跨学科就组合读取</strong>。</p>
+
+          <div class="ex-block positive">
+            <div class="ex-block-title">路由示例拆解</div>
+            <p class="ex-p">· <strong>临床心理量表</strong> → 生命与健康（临床工具 + 心理测量）<br>
+            · <strong>教育心理 / 组织行为</strong> → 社会行为（实验设计不同）<br>
+            · <strong>医学影像算法</strong> → 同时读生命健康 + 工程计算（临床影像 + 计算机视觉）<br>
+            · <strong>环境暴露健康效应</strong> → 同时读生命健康 + 农业环境（流行病学 + 暴露模型）</p>
+          </div>
+
+          <div class="ex-quote">不要因某学科尚未细化而退出本 skill。</div>
+          <p class="ex-p">这句话的潜台词：<strong>"通用入口"不是备胎，而是当所有专用规则都不适用时的兜底</strong>。每个学科模块的 SKILL.md 里只有细化过的才会写进领域规则；没细化的，自动退回通用方法。</p>
+        </div>
+
+        <!-- 通用分析思路 -->
+        <div class="ex-section anchor" id="ex-workflow">
+          <div class="ex-label">WORKFLOW / 通用分析思路</div>
+          <h2 class="ex-h2">四步，但不机械执行</h2>
+
+          <div class="timeline">
+            <div class="tl-item">
+              <h4>01 · 抓研究设计</h4>
+              <p>识别分析单位（谁/什么被观测）、关键变量、数据关系。<strong>只问能实质改变结论的问题</strong>，不搞"请确认变量类型"这类无意义交互。</p>
+            </div>
+            <div class="tl-item">
+              <h4>02 · 优先处理风险点</h4>
+              <p>缺失、异常、重复、依赖、混杂、泄漏、测量问题——这些是<strong>会把结论带偏的</strong>。其余内容（比如数据格式美观）保持轻量。</p>
+            </div>
+            <div class="tl-item">
+              <h4>03 · 最小充分方法</h4>
+              <p>方法要匹配设计和数据。<strong>简单任务直接跑完</strong>——比如两组独立样本 t 检验就不要加稳健性检验。复杂或高风险才加诊断、敏感性分析。</p>
+            </div>
+            <div class="tl-item">
+              <h4>04 · 聚焦交付</h4>
+              <p>结论 + 不确定性 + 局限 + 可行动建议。<strong>区分观测、计算、外部证据、假设</strong>——读者要清楚哪些是数据说的、哪些是推测。</p>
+            </div>
+          </div>
+
+          <p class="ex-p">还有个"脚本可选"分支：通用表格脚本只做两件事——<strong>结构盘点</strong>和<strong>声明式转换</strong>。它们<strong>不替代</strong>变量语义判断、统计方法选择、结果解释——那些是模型的活儿。</p>
+        </div>
+
+        <!-- 产物生成 -->
+        <div class="ex-section anchor" id="ex-output">
+          <div class="ex-label">OUTPUT / 产物生成</div>
+          <h2 class="ex-h2">写出即交付，不设检查门</h2>
+
+          <div class="ex-block warn">
+            <div class="ex-block-title">反模式警告</div>
+            <p class="ex-p">模型诊断、敏感性分析、验证评估——这些属于<strong>分析本身</strong>，应该在写报告前完成。<strong>不要</strong>做完分析再"检查一下"，那就成了"验收门"，而技能明确说<strong>不设验收门</strong>。</p>
+          </div>
+
+          <p class="ex-p">第二段更极端：产物写出后<strong>不再读取、解析、检查、lint、渲染、运行</strong>。不启动本地服务器，不打开浏览器，不截图。这意味着——<strong>技能自己不验证自己生成的东西</strong>，信任分析阶段的质量。</p>
+        </div>
+
+        <!-- 硬边界 -->
+        <div class="ex-section anchor" id="ex-boundary">
+          <div class="ex-label">HARD BOUNDARIES / 硬边界</div>
+          <h2 class="ex-h2">七条红线，每条都防一种常见错误</h2>
+
+          <ul class="boundary-list">
+            <li><div class="bl-num">B01</div><div class="bl-text"><strong>不代写论文、不伪造数据</strong>、不承诺显著/发表/审稿通过。这是学术诚信底线。</div></li>
+            <li><div class="bl-num">B02</div><div class="bl-text"><strong>不按显著性筛选</strong>——p 值显著不是"保留"的理由，p 值不显著也不是"丢掉"的理由。</div></li>
+            <li><div class="bl-num">B03</div><div class="bl-text"><strong>不改写原始数据</strong>。修正、排除、插补都发生在<strong>派生副本</strong>，必须可追溯。</div></li>
+            <li><div class="bl-num">B04</div><div class="bl-text"><strong>关联 ≠ 因果</strong>；<strong>群体 ≠ 个体</strong>。最容易被模型偷偷跨越的两条边界。</div></li>
+            <li><div class="bl-num">B05</div><div class="bl-text"><strong>不从字段名猜语义</strong>。叫 "score" 可能是考试分数，也可能是危险评分——证据不足就标候选。</div></li>
+            <li><div class="bl-num">B06</div><div class="bl-text">主报告只放影响判断的内容。审计台账、运行日志<strong>按需单独交付</strong>，不干扰主报告。</div></li>
+            <li><div class="bl-num">B07</div><div class="bl-text">资源不足时<strong>如实说明</strong>，继续做能做的。<strong>不把用户确认设为交付门</strong>。</div></li>
+          </ul>
+        </div>
+
+        <!-- 视觉表达 -->
+        <div class="ex-section anchor" id="ex-vision">
+          <div class="ex-label">VISUAL EXPRESSION / 视觉表达</div>
+          <h2 class="ex-h2">六原则，核心一条：<em>不为视觉而视觉</em></h2>
+
+          <ol class="vision-list">
+            <li><p>每页/每区只突出 <strong>一个</strong> 核心结论或数字。证据降一级。</p></li>
+            <li><p>优先用 <em>对齐、尺度、留白</em> 建立层级。不用等权 KPI 卡片、彩色边条、渐变、玻璃、阴影。</p></li>
+            <li><p>一图只答一个问题。标明单位、分母、样本量、区间、基准。精确值保留在表格。</p></li>
+            <li><p>一套稳定的字体、间距、颜色语义。关键区别 <strong>不能只靠红绿</strong>，直接标签优先于图例。</p></li>
+            <li><p>主报告 <strong>先给结论</strong>，审计台账、日志、文件清单<strong>不能抢阅读层级</strong>。</p></li>
+            <li><p><em>不为视觉丰富</em>加无关图表、交互、章节或装饰。</p></li>
+          </ol>
+
+          <div class="ex-block positive">
+            <div class="ex-block-title">与本页面的呼应</div>
+            <p class="ex-p">你现在看到的这个左右分栏页面——<strong>正文用衬线体 + 大留白 + 无彩色卡片 + 左栏 VS Code 风格深色原文</strong>——正是在践行这些原则。正文只有对齐和留白，没有一张卡片或渐变；颜色语义只有一处暖棕色用来提示重点。</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 分隔条 2 -->
+    <div class="divider" id="divider2"></div>
+
+    <!-- ============ 第三栏: 技能的理解与运用 ============ -->
+    <div class="pane">
+      <div class="pane-header right-header">
+        <div class="ph-title">
+          <span>APPLICATION · 技能的理解与运用</span>
+        </div>
+        <span>★</span>
+      </div>
+
+      <div class="explain-content" id="appPane">
+
+        <div class="ex-section anchor" id="ex-application">
+          <div class="ex-label">APPLICATION / 技能的理解与运用</div>
+          <h2 class="ex-h2">实战案例：一篇 ACL 着陆生物力学论文的可视化整理</h2>
+          <p class="ex-p"><strong>输入</strong>：NAJSPT 2009 论文《疲劳与性别对双侧着陆峰值生物力学变量出现时膝屈角的影响》正文 + 图 2–7。<strong>任务</strong>：分析数据并生成可视化图表。下面按本技能的工作方式还原整个处理过程。</p>
+
+          <div class="timeline">
+            <div class="tl-item">
+              <h4>01 · 数据识别：区分精确值与读数值</h4>
+              <p>图 6/7 的均值±SD、MANOVA 的 F/p 均取自<strong>正文精确值</strong>；图 2–5 的峰值坐标只能从图像<strong>近似读数</strong>，一律标注"近似值"——落实"区分观测、计算与假设"，不把读数当作精确数据。</p>
+            </div>
+            <div class="tl-item">
+              <h4>02 · 学科路由：生命与健康科学</h4>
+              <p>运动医学 / 生物力学研究，2（性别）× 2（疲劳）重复测量设计，MANOVA + 随访 ANOVA。</p>
+            </div>
+            <div class="tl-item">
+              <h4>03 · 最小充分方法</h4>
+              <p>原文统计检验已完成，本任务是"整理与可视化"——<strong>不重复建模、不重新检验</strong>，只做描述性呈现与交互作用图示。</p>
+            </div>
+            <div class="tl-item">
+              <h4>04 · 视觉表达：一图一问</h4>
+              <p>每张图只回答一个问题；40° ACL 风险阈值<strong>直接标注在图上</strong>；精确数值保留在表格，而非堆在图上。</p>
+            </div>
+            <div class="tl-item">
+              <h4>05 · 产物交付</h4>
+              <p>单文件 HTML 交付，图表支持 3 倍像素 PNG 导出，写出即交付。</p>
+            </div>
+          </div>
+
+          <div class="ex-block positive">
+            <div class="ex-block-title">核心发现</div>
+            <p class="ex-p">所有生物力学变量的峰值均出现在膝屈角 <strong>&gt; 40°</strong> 的着陆中后期——不在 ACL 损伤风险最高的着陆初期。性别与疲劳的主效应均不显著，但 <strong>性别 × 疲劳交互显著</strong>（MANOVA F(7,20)=4.8, p&lt;0.05）：女性疲劳后 VGRF 峰值膝屈角下降 5.6°、逼近 40° 风险区，男性反而微升 0.8°。</p>
+          </div>
+
+          <h2 class="ex-h2">图 1 · 峰值出现在着陆周期的什么阶段？</h2>
+          <div id="app1" class="app-chart" style="height:480px"></div>
+          <p class="app-note">四组对照（男/女 × 疲劳前/后）。红色虚线 = 40° ACL 风险阈值。各组模式一致：VGRF 最早出现（约 45–53°），膝外翻最晚（&gt;80°）。数据为原图 2–5 的近似读数。</p>
+
+          <h2 class="ex-h2">图 2 · 疲劳如何改变 VGRF 峰值时的膝屈角？</h2>
+          <div id="app2" class="app-chart" style="height:330px"></div>
+          <p class="app-note">性别 × 疲劳交互 p&lt;0.05；误差棒 = ±1 SD。女性 52.7°→47.1°（−5.6°），男性 48.8°→49.6°（+0.8°）。交叉形态即交互作用。</p>
+
+          <h2 class="ex-h2">图 3 · 疲劳如何改变外侧腘绳肌峰值激活时的膝屈角？</h2>
+          <div id="app3" class="app-chart" style="height:330px"></div>
+          <p class="app-note">交互 p=0.003。男性 62.2°→73.7°（+11.5°），女性 77.8°→75.0°（−2.8°）。峰值位于膝屈 &gt;60° 的着陆后期，作者认为其 ACL 临床相关性有限。</p>
+
+          <h2 class="ex-h2">图 4 · 六个变量峰值与 40° 风险阈值的相对位置？</h2>
+          <div id="app4" class="app-chart" style="height:330px"></div>
+          <p class="app-note">全部峰值落在红色高风险区（&lt;40°，着陆初期）之外；VGRF 最接近风险区（≈49°）。为四组近似均值。</p>
+
+          <h2 class="ex-h2">附表 · 统计结果</h2>
+          <table class="app-table">
+            <tr><th>效应</th><th>df</th><th>F</th><th>p</th><th>判定</th></tr>
+            <tr><td>性别主效应</td><td>7, 21</td><td>2.44</td><td>0.053</td><td>不显著</td></tr>
+            <tr><td>疲劳主效应</td><td>7, 21</td><td>1.91</td><td>0.119</td><td>不显著</td></tr>
+            <tr><td>性别 × 疲劳 交互</td><td>7, 20</td><td>4.80</td><td>&lt;0.05</td><td><strong>显著</strong></td></tr>
+          </table>
+          <table class="app-table">
+            <tr><th>交互显著变量</th><th>男：疲劳前 → 后</th><th>女：疲劳前 → 后</th><th>p</th></tr>
+            <tr><td>VGRF 峰值时膝屈角</td><td>48.8°±13 → 49.6°±15</td><td>52.7°±11 → 47.1°±11</td><td><strong>&lt;0.05</strong></td></tr>
+            <tr><td>外侧腘绳肌 NEMG 峰值时膝屈角</td><td>62.2°±19 → 73.7°±21</td><td>77.8°±16 → 75.0°±15</td><td><strong>0.003</strong></td></tr>
+          </table>
+          <p class="app-note">研究流程：3 次疲劳前着陆（40 cm 平台，双臂交叉抱胸）→ 疲劳方案（100 次跨障碍跳 + ≤50 次垂直跳）→ 6 分钟内完成 3 次疲劳后着陆。图 2/3 与附表为正文精确值。</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /split -->
+</div><!-- /app -->
+
+<script>
+  // ====== 源码行号处理 ======
+  (function addLineNumbers() {
+    const code = document.getElementById('mdCode');
+    if (!code) return;
+    // 把内容按 \n 拆分，每行包成 src-line span
+    const lines = code.innerHTML.split('\n');
+    // 标记哪些行有 id 锚点 (用于滚动联动)
+    const anchors = [];
+    code.querySelectorAll('[id^="md-"]').forEach(el => {
+      // 找到该元素在第几行
+      const parentHTML = el.parentElement ? el.parentElement.outerHTML : '';
+      // 简化：用正则在整段 HTML 里找 id 位置
+    });
+    let newHTML = '';
+    lines.forEach((lineContent, i) => {
+      const lineNum = i + 1;
+      // 检查这一行是否包含 h2 (## 开头) — 加高亮
+      const isAnchorLine = lineContent.includes('span id="md-');
+      const cls = 'src-line' + (isAnchorLine ? ' hl' : '');
+      // 提取这一行可能的 id
+      const idMatch = lineContent.match(/id="(md-[^"]+)"/);
+      const idAttr = idMatch ? ` id="${idMatch[1]}"` : '';
+      newHTML += `<span class="${cls}" data-line="${lineNum}"${idAttr}>${lineContent}</span>`;
+    });
+    code.innerHTML = newHTML;
+    // 更新 header 显示真实行数
+    document.querySelector('.ph-title span:last-child, .pane-header span:last-child');
+  })();
+
+  // 顶栏 tab 点击滚动
+  const tabs = document.querySelectorAll('.tb-tab');
+  const panes = document.querySelectorAll('.pane');
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (i === 2) {
+        const target = document.getElementById('appPane');
+        if (target) target.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      panes[i === 0 ? 0 : 1].querySelector(i === 0 ? '.md-content' : '.explain-content').scrollTo(0, 0);
+    });
+  });
+
+  // 分隔条拖拽
+  const divider = document.getElementById('divider');
+  const split = document.querySelector('.split');
+  let dragging = false;
+  divider.addEventListener('mousedown', () => dragging = true);
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const rect = split.getBoundingClientRect();
+    const leftPct = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+    const rightPct = (100 - leftPct).toFixed(1);
+    if (parseFloat(leftPct) > 20 && parseFloat(leftPct) < 80) {
+      panes[0].style.flex = `0 0 ${leftPct}%`;
+      panes[1].style.flex = `0 0 ${rightPct}%`;
+    }
+  });
+  document.addEventListener('mouseup', () => dragging = false);
+
+  // 分隔条 2 拖拽（第二、三栏之间）
+  const divider2 = document.getElementById('divider2');
+  let dragging2 = false;
+  if (divider2) {
+    divider2.addEventListener('mousedown', () => dragging2 = true);
+    document.addEventListener('mousemove', e => {
+      if (!dragging2) return;
+      const rect = split.getBoundingClientRect();
+      const rightPct = ((rect.right - e.clientX) / rect.width * 100).toFixed(1);
+      if (parseFloat(rightPct) > 18 && parseFloat(rightPct) < 50) {
+        panes[2].style.flex = `0 0 ${rightPct}%`;
+      }
+    });
+    document.addEventListener('mouseup', () => dragging2 = false);
+  }
+
+  // 滚动同步 (简单版本)
+  const mdPane = document.getElementById('mdPane');
+  const exPane = document.getElementById('exPane');
+  const syncMap = [
+    ['md-intro', 'ex-intro'],
+    ['md-constraints', 'ex-constraints'],
+    ['md-disciplines', 'ex-disciplines'],
+    ['md-workflow', 'ex-workflow'],
+    ['md-output', 'ex-output'],
+    ['md-boundary', 'ex-boundary'],
+    ['md-vision', 'ex-vision'],
+  ];
+
+  let syncing = false;
+  mdPane.addEventListener('scroll', () => {
+    if (syncing) return;
+    syncing = true;
+    // 找到左栏当前可见的 h2
+    for (const [mdId, exId] of syncMap) {
+      const el = document.getElementById(mdId);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const parentRect = mdPane.getBoundingClientRect();
+        if (rect.top >= parentRect.top - 10 && rect.top <= parentRect.top + parentRect.height / 3) {
+          const target = document.getElementById(exId);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+      }
+    }
+    setTimeout(() => syncing = false, 300);
+  });
+</script>
+
+<script>
+/* ============ 运用章节图表（配色适配宿主页面） ============ */
+(function(){
+  if (typeof echarts === 'undefined') return;
+  var SUB='#6b6b68', LINE='#e8e8e4', INKC='#1a1a1a', RISK='#b5504a';
+  var variables=['VGRF','股直肌','股内侧肌','内侧腘绳肌','外侧腘绳肌','膝外翻'];
+  var colors=['#3a6db5','#b5733a','#5a8a6f','#8e6bbf','#b5504a','#8a8a86'];
+  var charts=[];
+
+  /* ---- 图1：四联着陆周期 ---- */
+  var curve=[[0,19],[10,33],[20,45],[25,49],[30,56],[35,62],[40,66],[45,72],[50,77],[55,81],[60,84],[65,86],[70,88],[80,91],[90,92],[100,93]];
+  var groups=[
+    {name:'非疲劳男性', data:{VGRF:[22,49],'股直肌':[30,59],'股内侧肌':[36,66],'内侧腘绳肌':[33,63],'外侧腘绳肌':[45,72],'膝外翻':[72,86]}},
+    {name:'疲劳男性',   data:{VGRF:[24,50],'股直肌':[33,60],'股内侧肌':[40,66],'内侧腘绳肌':[36,63],'外侧腘绳肌':[47,75],'膝外翻':[62,82]}},
+    {name:'非疲劳女性', data:{VGRF:[26,53],'股直肌':[36,65],'股内侧肌':[38,66],'内侧腘绳肌':[33,59],'外侧腘绳肌':[50,80],'膝外翻':[73,88]}},
+    {name:'疲劳女性',   data:{VGRF:[23,45],'股直肌':[30,60],'股内侧肌':[34,65],'内侧腘绳肌':[32,62],'外侧腘绳肌':[44,76],'膝外翻':[65,86]}}
+  ];
+  var grids=[], xAxes=[], yAxes=[], series1=[];
+  var gridPos=[{left:'9%',top:'13%',width:'37%',height:'28%'},{left:'58%',top:'13%',width:'37%',height:'28%'},
+               {left:'9%',top:'58%',width:'37%',height:'28%'},{left:'58%',top:'58%',width:'37%',height:'28%'}];
+  groups.forEach(function(g,gi){
+    grids.push(Object.assign({containLabel:true},gridPos[gi]));
+    xAxes.push({type:'value',min:0,max:100,gridIndex:gi,name: gi>1?'着陆周期 %':'',nameLocation:'middle',nameGap:24,
+      nameTextStyle:{color:SUB,fontSize:11},axisLabel:{color:SUB,fontSize:10},splitLine:{lineStyle:{color:LINE}}});
+    yAxes.push({type:'value',min:0,max:100,gridIndex:gi,name: gi%2===0?'膝屈角 (°)':'',nameTextStyle:{color:SUB,fontSize:11},
+      axisLabel:{color:SUB,fontSize:10},splitLine:{lineStyle:{color:LINE}}});
+    series1.push({type:'line',data:curve,xAxisIndex:gi,yAxisIndex:gi,showSymbol:false,smooth:true,
+      lineStyle:{color:'#d8d8d4',width:1.5},silent:true,z:1});
+    variables.forEach(function(v,vi){
+      series1.push({name:v,type:'scatter',data:[g.data[v]],xAxisIndex:gi,yAxisIndex:gi,
+        symbolSize:9,itemStyle:{color:colors[vi],borderColor:'#fff',borderWidth:1},z:3});
+    });
+    series1.push({type:'line',data:[],xAxisIndex:gi,yAxisIndex:gi,
+      markLine:{silent:true,symbol:'none',label:{formatter:'40°',color:RISK,fontSize:9,position:'insideEndTop'},
+        lineStyle:{color:RISK,type:'dashed',width:1},data:[{yAxis:40}]}});
+    series1.push({type:'scatter',data:[],xAxisIndex:gi,yAxisIndex:gi,
+      markArea:{silent:true,itemStyle:{color:'rgba(181,80,74,0.06)'},data:[[{yAxis:0},{yAxis:40}]]}});
+    series1.push({type:'scatter',data:[[50,94]],xAxisIndex:gi,yAxisIndex:gi,symbolSize:0,silent:true,
+      label:{show:true,formatter:g.name,fontSize:12,fontWeight:'bold',color:INKC},tooltip:{show:false}});
+  });
+  var app1=echarts.init(document.getElementById('app1'));
+  app1.setOption({
+    animation:false,
+    legend:{data:variables,bottom:0,itemWidth:12,itemHeight:8,textStyle:{fontSize:11,color:SUB}},
+    grid:grids, xAxis:xAxes, yAxis:yAxes, series:series1,
+    tooltip:{trigger:'item',formatter:function(p){
+      return (p.seriesType==='scatter'&&p.value&&p.seriesName)? p.seriesName+'：周期 '+p.value[0]+'%，膝屈角 '+p.value[1]+'°':'';
+    }}
+  });
+  charts.push(app1);
+
+  /* ---- 交互作用图 ---- */
+  function errorBar(data){
+    return {type:'custom',silent:true,z:5,
+      renderItem:function(params,api){
+        var c=api.coord([api.value(0),api.value(1)]);
+        var lo=api.coord([api.value(0),api.value(1)-api.value(2)]);
+        var hi=api.coord([api.value(0),api.value(1)+api.value(2)]);
+        var hw=8, st={stroke:api.value(3),fill:api.value(3),lineWidth:1.4};
+        return {type:'group',children:[
+          {type:'line',shape:{x1:c[0],y1:lo[1],x2:c[0],y2:hi[1]},style:st},
+          {type:'line',shape:{x1:c[0]-hw,y1:lo[1],x2:c[0]+hw,y2:lo[1]},style:st},
+          {type:'line',shape:{x1:c[0]-hw,y1:hi[1],x2:c[0]+hw,y2:hi[1]},style:st}
+        ]};
+      },data:data};
+  }
+  function interactionChart(elId, male, female, ymin, ymax){
+    var cMale='#3a6db5', cFemale='#b5733a';
+    var ch=echarts.init(document.getElementById(elId));
+    ch.setOption({
+      grid:{left:56,right:30,top:40,bottom:36},
+      legend:{data:['男性','女性'],top:4,textStyle:{color:SUB,fontSize:11},itemWidth:14},
+      xAxis:{type:'category',data:['疲劳前','疲劳后'],axisLabel:{color:INKC,fontSize:12},
+        axisLine:{lineStyle:{color:'#c8c8c4'}},axisTick:{show:false}},
+      yAxis:{type:'value',min:ymin,max:ymax,name:'膝屈角 (°)',nameTextStyle:{color:SUB,fontSize:11},
+        axisLabel:{color:SUB,fontSize:10},splitLine:{lineStyle:{color:LINE}}},
+      series:[
+        {name:'男性',type:'line',data:[male[0],male[1]],symbolSize:9,
+          itemStyle:{color:cMale},lineStyle:{color:cMale,width:2.2},
+          label:{show:true,formatter:function(p){return p.value.toFixed(1)+'°'},position:'top',color:cMale,fontSize:11}},
+        {name:'女性',type:'line',data:[female[0],female[1]],symbolSize:9,
+          itemStyle:{color:cFemale},lineStyle:{color:cFemale,width:2.2},
+          label:{show:true,formatter:function(p){return p.value.toFixed(1)+'°'},position:'bottom',color:cFemale,fontSize:11}},
+        errorBar([[0,male[0],male[2],cMale],[1,male[1],male[3],cMale]]),
+        errorBar([[0,female[0],female[2],cFemale],[1,female[1],female[3],cFemale]]),
+        {type:'line',data:[],markLine:{silent:true,symbol:'none',
+          label:{formatter:'40° ACL 风险阈值',color:RISK,fontSize:9,position:'insideEndTop'},
+          lineStyle:{color:RISK,type:'dashed'},data:[{yAxis:40}]}}
+      ],
+      tooltip:{trigger:'axis'}
+    });
+    return ch;
+  }
+  charts.push(interactionChart('app2',[48.8,49.6,13,15],[52.7,47.1,11,11],30,65));
+  charts.push(interactionChart('app3',[62.2,73.7,19,21],[77.8,75.0,16,15],40,100));
+
+  /* ---- 图4：六变量总览 ---- */
+  var overview=[
+    {name:'VGRF',val:49.3},
+    {name:'股直肌 NEMG',val:61.0},
+    {name:'内侧腘绳肌 NEMG',val:61.8},
+    {name:'股内侧肌 NEMG',val:65.8},
+    {name:'外侧腘绳肌 NEMG',val:75.8},
+    {name:'膝外翻',val:85.5}
+  ];
+  var app4=echarts.init(document.getElementById('app4'));
+  app4.setOption({
+    grid:{left:110,right:56,top:24,bottom:36},
+    xAxis:{type:'value',min:0,max:100,name:'峰值出现时的膝屈角 (°)',nameLocation:'middle',nameGap:24,
+      nameTextStyle:{color:SUB,fontSize:11},axisLabel:{color:SUB,fontSize:10},splitLine:{lineStyle:{color:LINE}}},
+    yAxis:{type:'category',data:overview.map(function(d){return d.name}),inverse:true,
+      axisLabel:{color:INKC,fontSize:11},axisTick:{show:false},axisLine:{show:false}},
+    series:[
+      {type:'bar',data:overview.map(function(d,i){return {value:d.val,itemStyle:{color:colors[i],borderRadius:[0,3,3,0]}}}),
+        barWidth:16,label:{show:true,position:'right',formatter:'≈{c}°',color:SUB,fontSize:11},
+        markArea:{silent:true,itemStyle:{color:'rgba(181,80,74,0.10)'},
+          label:{show:true,position:'insideTop',color:RISK,fontSize:10,formatter:'ACL 高风险区（<40°，着陆初期）'},
+          data:[[{xAxis:0},{xAxis:40}]]},
+        markLine:{silent:true,symbol:'none',lineStyle:{color:RISK,type:'dashed'},
+          label:{show:false},data:[{xAxis:40}]}}
+    ],
+    tooltip:{trigger:'item',formatter:function(p){return p.name+'：≈'+p.value+'°';}}
+  });
+  charts.push(app4);
+
+  /* 尺寸变化时重绘（窗口 + 分隔条拖拽结束） */
+  function resizeAll(){charts.forEach(function(c){c.resize()});}
+  window.addEventListener('resize',resizeAll);
+  document.addEventListener('mouseup',function(){setTimeout(resizeAll,60);});
+})();
+</script>
+</body>
+</html>
